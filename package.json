@@ -2,22 +2,45 @@
   "name": "rwa-dex-frontend",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start"
   },
+
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@faker-js/faker": "^9.4.0",
+    "@mui/material": "^6.4.2",
+    "@rainbow-me/rainbowkit": "^2.2.3",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@tanstack/react-query": "^5.64.2",
+    "@wagmi/core": "^2.16.3",
+    "chart.js": "^4.4.7",
+    "ethers": "^6.13.5",
+    "faker": "^6.6.6",
+    "framer-motion": "^12.4.7",
+    "ipfs-http-client": "^60.0.1",
+    "lucide-react": "^0.483.0",
+    "multihashes": "^4.0.3",
+    "next": "15.1.6",
+    "nft.storage": "^7.2.0",
     "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
-    "next": "15.1.6"
+    "react-is": "^19.0.0",
+    "recharts": "^2.15.1",
+    "use-debounce": "^10.0.4",
+    "viem": "^2.22.14",
+    "wagmi": "^2.14.9"
   },
   "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
+    "@eslint/eslintrc": "^3",
+    "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
-    "@eslint/eslintrc": "^3"
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17"
   }
 }
