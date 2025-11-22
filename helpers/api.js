@@ -1,3 +1,6 @@
+
+
+
 export const fetchAssetData = async (ticket, currentTime) => {
     const formatCurrentTime = currentTime.toISOString().split('T')[0];
     try {
@@ -5,8 +8,8 @@ export const fetchAssetData = async (ticket, currentTime) => {
             method: 'GET',
             headers: {
                 accept: 'application/json',
-                'APCA-API-KEY-ID': 'AKDP0IZ5RKE7POWX2BVU',
-                'APCA-API-SECRET-KEY': 'WOH0tKFtvv9KXguY7OiyJnLVmFv3uYtdvwgCrwW2'
+                'APCA-API-KEY-ID': process.env.NEXT_PUBLIC_ALPACA_BROKER_KEY,
+                'APCA-API-SECRET-KEY': process.env.NEXT_PUBLIC_ALPACA_BROKER_SECRET
             }
         });
 
@@ -36,6 +39,8 @@ export const createAccount = async (name, email, familyName) => {
     const timeNow = new Date();
     const formatCurrentTime = timeNow.toISOString().split('T')[0];
 
+    const auth = 'Basic ' + btoa(`${process.env.NEXT_PUBLIC_ALPACA_TRADING_KEY}:${process.env.NEXT_PUBLIC_ALPACA_TRADING_SECRET}`)
+
     try {
         // Create account
         const getAssetData = await fetch(`https://broker-api.sandbox.alpaca.markets/v1/accounts`, {
@@ -43,7 +48,7 @@ export const createAccount = async (name, email, familyName) => {
             headers: {
                 accept: 'application/json',
                 'content-type': 'application/json',
-                authorization: 'Basic Q0sxVjMySEhGVlFKNlhFTTY5MUY6RGZFVmlxUFQyVjVKR2NjQmZaWldaM0FnSHlzU0EzYWRmZW1neVByMQ=='
+                authorization: auth
             },
             body: JSON.stringify({
                 contact: {
@@ -88,7 +93,7 @@ export const createAccount = async (name, email, familyName) => {
                 method: 'GET',
                 headers: {
                     accept: 'application/json',
-                    authorization: 'Basic Q0sxVjMySEhGVlFKNlhFTTY5MUY6RGZFVmlxUFQyVjVKR2NjQmZaWldaM0FnSHlzU0EzYWRmZW1neVByMQ=='
+                    authorization: auth
                 }
             })
 
@@ -100,7 +105,7 @@ export const createAccount = async (name, email, familyName) => {
                 headers: {
                     accept: 'application/json',
                     'content-type': 'application/json',
-                    authorization: 'Basic Q0sxVjMySEhGVlFKNlhFTTY5MUY6RGZFVmlxUFQyVjVKR2NjQmZaWldaM0FnSHlzU0EzYWRmZW1neVByMQ=='
+                    authorization: auth
                 },
                 body: JSON.stringify({
                     bank_account_type: 'CHECKING',
@@ -111,7 +116,6 @@ export const createAccount = async (name, email, familyName) => {
             })
 
             const response = await createACH.json();
-            console.log(response)
 
             if(response.status == "QUEUED") {
                 const fundAccount = await fetch(`https://broker-api.sandbox.alpaca.markets/v1/accounts/${accountId}/transfers`, {
@@ -119,7 +123,7 @@ export const createAccount = async (name, email, familyName) => {
                     headers: {
                         accept: 'application/json',
                         'content-type': 'application/json',
-                        authorization: 'Basic Q0sxVjMySEhGVlFKNlhFTTY5MUY6RGZFVmlxUFQyVjVKR2NjQmZaWldaM0FnSHlzU0EzYWRmZW1neVByMQ=='
+                        authorization: auth
                     },
                     body: JSON.stringify({
                         transfer_type: 'ach',
@@ -158,8 +162,8 @@ export const fetchAssetDataChart = async (ticket, currentTime, startDate, timefr
             method: 'GET',
             headers: {
                 accept: 'application/json',
-                'APCA-API-KEY-ID': 'AKDP0IZ5RKE7POWX2BVU',
-                'APCA-API-SECRET-KEY': 'WOH0tKFtvv9KXguY7OiyJnLVmFv3uYtdvwgCrwW2'
+                'APCA-API-KEY-ID': process.env.NEXT_PUBLIC_ALPACA_BROKER_KEY,
+                'APCA-API-SECRET-KEY': process.env.NEXT_PUBLIC_ALPACA_BROKER_SECRET
             }
         });
 
@@ -182,8 +186,8 @@ export const fetchCurrentPrice = async (ticket) => {
             method: 'GET',
             headers: {
                 accept: 'application/json',
-                'APCA-API-KEY-ID': 'AKDP0IZ5RKE7POWX2BVU',
-                'APCA-API-SECRET-KEY': 'WOH0tKFtvv9KXguY7OiyJnLVmFv3uYtdvwgCrwW2'
+                'APCA-API-KEY-ID': process.env.NEXT_PUBLIC_ALPACA_BROKER_KEY,
+                'APCA-API-SECRET-KEY': process.env.NEXT_PUBLIC_ALPACA_BROKER_SECRET
             }
         });
 
@@ -201,8 +205,8 @@ export const fetchAssetDetails = async (ticket) => {
             method: 'GET',
             headers: {
                 accept: 'application/json',
-                'APCA-API-KEY-ID': 'AKDP0IZ5RKE7POWX2BVU',
-                'APCA-API-SECRET-KEY': 'WOH0tKFtvv9KXguY7OiyJnLVmFv3uYtdvwgCrwW2'
+                'APCA-API-KEY-ID': process.env.NEXT_PUBLIC_ALPACA_BROKER_KEY,
+                'APCA-API-SECRET-KEY': process.env.NEXT_PUBLIC_ALPACA_BROKER_SECRET
             }
         });
 
@@ -221,12 +225,14 @@ export const fetchAssetDetails = async (ticket) => {
 }
 
 export const fetchAccountOrders = async () => {
+    const auth = 'Basic ' + btoa(`${process.env.NEXT_PUBLIC_ALPACA_BROKER_KEY}:${process.env.NEXT_PUBLIC_ALPACA_BROKER_SECRET}`)
+
     try {
         const getAssetData = await fetch(`https://broker-api.sandbox.alpaca.markets/v1/accounts/activities/FILL?account_id=794a4d52-3746-4e99-ae86-038ead252047&page_size=100`, {
             method: 'GET',
             headers: {
                 accept: 'application/json',
-                authorization: 'Basic Q0sxVjMySEhGVlFKNlhFTTY5MUY6RGZFVmlxUFQyVjVKR2NjQmZaWldaM0FnSHlzU0EzYWRmZW1neVByMQ=='
+                authorization: auth
             }
         });
 

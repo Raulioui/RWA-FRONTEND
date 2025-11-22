@@ -60,10 +60,9 @@ export default function page({ params }) {
                 setLoading(true);
 
                 const provider = new ethers.JsonRpcProvider('https://arb-sepolia.g.alchemy.com/v2/ieYm8d748qFp12e9B0YO0haOD15fxPJo');
-                const contractAddress = '0x042755c9709051eBD4a2EAA73065B09838e5e8D0';
+                const contractAddress = '0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F';
 
-                const abi = assetPoolAbi.abi || assetPoolAbi;
-                const assetPoolContract = new ethers.Contract(contractAddress, abi, provider);
+                const assetPoolContract = new ethers.Contract(contractAddress, assetPoolAbi, provider);
 
                 const assetInfo = await assetPoolContract.getAssetInfo(id);
                 console.log('All tickets:', assetInfo);

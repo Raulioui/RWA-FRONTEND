@@ -8,8 +8,9 @@ import assetAbi from "../../abi/assetAbi.json"; // Standard ERC20 ABI
 import usdtAbi from '../../abi/usdtAbi.json';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Loader from "../components/ui/Loader";
 
-const ASSET_POOL_ADDRESS = "0xCcbd04Ff2B9613B5bB12755BE4E86f72734D9cfC";
+const ASSET_POOL_ADDRESS = "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F";
 
 export default function PortfolioPage() {
     const { address, isConnected } = useAccount();
@@ -89,12 +90,7 @@ export default function PortfolioPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0E0B1C] flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                    <p className="text-gray-400">Loading your portfolio...</p>
-                </div>
-            </div>
+            <Loader text={"Loading portfolio..."} />
         );
     }
 

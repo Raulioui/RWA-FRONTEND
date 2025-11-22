@@ -24,7 +24,7 @@ export default function AssetsDisplay() {
                 setError(null)
                 
                 const provider = new ethers.JsonRpcProvider('https://arb-sepolia.g.alchemy.com/v2/ieYm8d748qFp12e9B0YO0haOD15fxPJo');
-                const contractAddress = '0xCcbd04Ff2B9613B5bB12755BE4E86f72734D9cfC';
+                const contractAddress = '0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F';
                 
                 // Make sure ABI is properly accessed
                 const abi = assetPoolAbi.abi || assetPoolAbi; // Handle both formats
