@@ -9,6 +9,7 @@ import usdtAbi from '../../abi/usdtAbi.json';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Loader from "../components/ui/Loader";
+import AssetComponentPortfolio from "../components/ui/AssetComponentPortfolio";
 
 const ASSET_POOL_ADDRESS = "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F";
 
@@ -109,9 +110,11 @@ export default function PortfolioPage() {
                             Wallet: {address?.slice(0, 6)}...{address?.slice(-4)}
                         </p>
                         <p className="text-gray-400 mt-1">
-                            Total Assets: {totalAssets}
+                            Balance: {usdtBalance?.data}
                         </p>
                     </div>
+
+
 
 
                     {portfolioData.length === 0 ? (
@@ -119,66 +122,76 @@ export default function PortfolioPage() {
                             <p className="text-gray-400 text-lg">No assets found in the protocol</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div>
-                                <p>Usdt balance: {usdtBalance?.data}</p>
-                            </div>
-                            {portfolioData.map((asset, index) => {
-                                const hasBalance = BigInt(asset.balance) > 0n;
-                                const formattedBalance = (Number(asset.balance) / 1e18).toFixed(4);
+                        <table className="w-full text-left rtl:text-right ">
+                            <thead >
+                                <tr className="text-[#5B6173]">
+                                    <th scope="col" className="px-6 py-4">
+                                        Asset
+                                    </th>
+                                    <th scope="col" className="px-6 py-4">
+                                        Quantity
+                                    </th>
+                                    <th scope="col" className="px-6 py-4">
+                                        Address
+                                    </th>
+                                    <th scope="col" className="px-6 py-4 hidden md:table-cell">
+                                        Last Price
+                                    </th>
+                                    <th scope="col" className="px-6 py-4 hidden md:table-cell">
+                                        Volume
+                                    </th>
 
-                                return (
-                                    <div
-                                        key={index}
-                                        className={`bg-[#1E1C34] border rounded-2xl p-6 transition-all ${hasBalance
-                                                ? 'border-purple-500 shadow-lg shadow-purple-500/20'
-                                                : 'border-gray-700 opacity-60'
-                                            }`}
-                                    >
-                                        {/* Asset Image */}
-                                        {asset.uri && (
-                                            <div className="w-full h-40 bg-[#0E0B1C] rounded-lg mb-4 flex items-center justify-center">
-                                                <img
-                                                    src={`https://ipfs.io/ipfs/${asset.uri}`}
-                                                    alt={asset.name}
-                                                    className="max-h-full max-w-full object-contain"
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                    }}
-                                                />
-                                            </div>
-                                        )}
+                                </tr>
+                            </thead>
 
-                                        {/* Asset Info */}
-                                        <div>
-                                            <h3 className="text-xl font-bold mb-1">{asset.name}</h3>
-                                            <p className="text-sm text-gray-400 mb-3">{asset.ticket}</p>
+                            <tbody>
+                                <tr
+                                                className={`hover:bg-[#1E1C34] border-t-[1px] border-t-gray-600 transition duration-200  hover:cursor-pointer rounded-xl`}
+                                                onClick={() => router.push(`/asset/${ticket}`)}
+                                            >
+                                                <th scope="row" className="px-4 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                                    <div className="flex items-center gap-4">
+                                                         {/* <Image src={`https://ipfs.io/ipfs/${uri}`} width={25} height={25} alt={uri}/>  */}
+                                                        <div className="flex items-start flex-col gap-1 justify-center">
+                                                            <p className="">USDT</p> 
+                                                            <p className="text-[#5B6173] text-sm">USDT</p>
+                                                        </div>
+                                                    </div>
+                                                </th>
+                                                <td>
+                                                    200
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    -
+                                                </td>
+                                                <td className="px-6 py-4 absolute hidden md:table-cell">
+                                                        -
+                                                </td>
+                                                <td className="px-6 py-4 hidden md:table-cell">
+                                                    -
+                                                </td>
+                                            </tr>
+                                {portfolioData.map((asset, index) => {
+                                    return (
+                                        <AssetComponentPortfolio
+                                            key={index}
+                                            balance={asset.balance}
+                                            ticket={asset.ticket}
+                                            assetAddress={asset.assetAddress}
+                                            uri={asset.uri}
+                                            id={asset.id}
+                                            name={asset.name}
+                                        />
+                                    )
+                                })}
+                            </tbody>
+                        </table>
 
-                                            {/* Balance */}
-                                            <div className="bg-[#0E0B1C] rounded-lg p-3 mb-3">
-                                                <p className="text-xs text-gray-400 mb-1">Balance</p>
-                                                <p className={`text-2xl font-bold ${hasBalance ? 'text-green-400' : 'text-gray-500'}`}>
-                                                    {formattedBalance}
-                                                </p>
-                                            </div>
-
-                                            {/* Contract Address */}
-                                            <div className="text-xs text-gray-500">
-                                                <p>Contract:</p>
-                                                <p className="font-mono truncate">
-                                                    {asset.address?.slice(0, 10)}...{asset.address?.slice(-8)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
                     )}
                 </div>
             </div>
-            
-            <Footer/>
+
+            <Footer />
         </>
 
     );
