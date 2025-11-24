@@ -1,5 +1,4 @@
 "use client"
-import { formatCurrency } from "../../../lib/formatters";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { useEffect, useState } from "react";
 import {fetchAssetDataChart} from "../../../helpers/api.js"

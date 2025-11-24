@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import assetPool from "../../../abi/assetPool.json";
 import { arbitrumSepolia } from 'wagmi/chains';
@@ -15,8 +15,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
     const [assetQty, setAssetQty] = useState(1);
     const [mintMode, setMintMode] = useState(true);
     const [sellMode, setSellMode] = useState(false);
-    const [needsApproval, setNeedsApproval] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
 
     const account = useAccount();
     
@@ -104,49 +102,62 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
     const assetBalance = assetBalanceRaw ? formatUnits(assetBalanceRaw, 18) : "0";
     const usdtBalance = usdtBalanceRaw ? formatUnits(usdtBalanceRaw, 6) : "0";
 
-    // Check if approval is needed
-    const needsUsdtApproval = () => {
-        if (!usdtAllowance || !usdQty) return true;
-        const requiredAmount = parseUnits(usdQty.toString(), 6);
-        return BigInt(usdtAllowance) < BigInt(requiredAmount);
-    };
-
-    const needsAssetApproval = () => {
-        if (!assetAllowance || !assetQty) return true;
-        const requiredAmount = parseUnits(assetQty.toString(), 18);
-        return BigInt(assetAllowance) < BigInt(requiredAmount);
-    };
-
-    // Check if approval is needed whenever amounts or mode changes
-    useEffect(() => {
-        if (mintMode) {
-            setNeedsApproval(needsUsdtApproval());
-        } else {
-            setNeedsApproval(needsAssetApproval());
+    // Memoize approval check functions
+    const needsUsdtApproval = useMemo(() => {
+        if (!usdtAllowance || !usdQty || usdQty <= 0) return true;
+        try {
+            const requiredAmount = parseUnits(usdQty.toString(), 6);
+            return BigInt(usdtAllowance) < BigInt(requiredAmount);
+        } catch {
+            return true;
         }
-    }, [usdQty, assetQty, mintMode, usdtAllowance, assetAllowance]);
+    }, [usdtAllowance, usdQty]);
+
+    const needsAssetApproval = useMemo(() => {
+        if (!assetAllowance || !assetQty || assetQty <= 0) return true;
+        try {
+            const requiredAmount = parseUnits(assetQty.toString(), 18);
+            return BigInt(assetAllowance) < BigInt(requiredAmount);
+        } catch {
+            return true;
+        }
+    }, [assetAllowance, assetQty]);
+
+    // Determine which approval is needed based on mode
+    const needsApproval = mintMode ? needsUsdtApproval : needsAssetApproval;
 
     // Auto-refetch allowances after approval success
     useEffect(() => {
         if (isApprovalSuccess) {
-            setTimeout(async () => {
-                await refetchUsdtAllowance();
-                await refetchAssetAllowance();
-            }, 1000);
+            const refetchAllowances = async () => {
+                await Promise.all([
+                    refetchUsdtAllowance(),
+                    refetchAssetAllowance()
+                ]);
+            };
+            refetchAllowances();
         }
-    }, [isApprovalSuccess]);
+    }, [isApprovalSuccess, refetchUsdtAllowance, refetchAssetAllowance]);
 
     // Refetch balances after trade success
     useEffect(() => {
         if (isTradeSuccess) {
-            setTimeout(async () => {
-                await refetchUsdtBalance();
-                await refetchAssetBalance();
-            }, 1000);
+            const refetchBalances = async () => {
+                await Promise.all([
+                    refetchUsdtBalance(),
+                    refetchAssetBalance()
+                ]);
+            };
+            refetchBalances();
         }
-    }, [isTradeSuccess]);
+    }, [isTradeSuccess, refetchUsdtBalance, refetchAssetBalance]);
 
-    async function handleApprove() {
+    const handleApprove = useCallback(async () => {
+        if (!token?.address) {
+            console.error("Token address not available");
+            return;
+        }
+
         try {
             if (mintMode) {
                 // Approve USDT
@@ -172,21 +183,13 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         } catch (error) {
             console.error("Approval failed:", error);
         }
-    }
+    }, [mintMode, usdQty, assetQty, token, approveContract]);
 
-    async function handleTrade() {
-        try {
-            if (mintMode) {
-                await executeBuy();
-            } else {
-                await executeSell();
-            }
-        } catch (error) {
-            console.error("Trade failed:", error);
+    const executeBuy = useCallback(async () => {
+        if (!token?.ticket) {
+            throw new Error("Token ticket not available");
         }
-    }
 
-    async function executeBuy() {
         const usdInWei = parseUnits(usdQty.toString(), 6);
         const assetQtyInWei = parseUnits(assetQty.toString(), 18);
 
@@ -197,9 +200,13 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
             abi: assetPool,
             args: [usdInWei, token.ticket, assetQtyInWei],
         });
-    }
+    }, [usdQty, assetQty, token, tradeContract]);
 
-    async function executeSell() {
+    const executeSell = useCallback(async () => {
+        if (!token?.ticket) {
+            throw new Error("Token ticket not available");
+        }
+
         const assetInWei = parseUnits(assetQty.toString(), 18);
         const usdQtyInWei = parseUnits(usdQty.toString(), 6);
 
@@ -210,15 +217,48 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
             abi: assetPool,
             args: [assetInWei, token.ticket, usdQtyInWei],
         });
-    }
+    }, [assetQty, usdQty, token, tradeContract]);
+
+    const handleTrade = useCallback(async () => {
+        try {
+            if (mintMode) {
+                await executeBuy();
+            } else {
+                await executeSell();
+            }
+        } catch (error) {
+            console.error("Trade failed:", error);
+        }
+    }, [mintMode, executeBuy, executeSell]);
 
     useEffect(() => {
-        setUsdQty(price);
-    }, [loading, price]);
+        if (price && price > 0) {
+            setUsdQty(price);
+        }
+    }, [price]);
 
-    if (loading || price == 0) return (
-        <p>Loading....</p>
-    );
+    // Input change handlers
+    const handleUsdtChange = useCallback((value) => {
+        const numValue = parseFloat(value) || 0;
+        setUsdQty(numValue);
+        if (price > 0) {
+            setAssetQty(parseFloat((numValue / price).toFixed(4)));
+        }
+    }, [price]);
+
+    const handleAssetChange = useCallback((value) => {
+        const numValue = parseFloat(value) || 0;
+        setAssetQty(numValue);
+        setUsdQty(parseFloat((numValue * price).toFixed(2)));
+    }, [price]);
+
+    if (loading || !price || price === 0) {
+        return <p>Loading....</p>;
+    }
+
+    if (!token) {
+        return <p>Token information not available</p>;
+    }
 
     // Input components
     const UsdtInput = () => (
@@ -226,12 +266,11 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
             <div className="flex flex-col p-4 w-[200px] gap-2">
                 <div className="flex justify-between items-center">
                     <input 
-                        type="text" 
+                        type="number" 
+                        step="0.01"
+                        min="0"
                         className="w-full bg-transparent text-white focus:outline-none"
-                        onChange={(e) => {
-                            setAssetQty((e.target.value / price).toFixed(4));
-                            setUsdQty(e.target.value);
-                        }} 
+                        onChange={(e) => handleUsdtChange(e.target.value)} 
                         value={usdQty}
                         disabled={isApprovePending || isApprovalConfirming || isTradePending || isTradeConfirming}
                     />
@@ -249,12 +288,11 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
             <div className="flex flex-col p-4 w-[200px] gap-2">
                 <div className="flex justify-between items-center">
                     <input 
-                        type="text" 
+                        type="number" 
+                        step="0.0001"
+                        min="0"
                         className="w-full bg-transparent text-white focus:outline-none"
-                        onChange={(e) => {
-                            setUsdQty(e.target.value * price);
-                            setAssetQty(e.target.value);
-                        }} 
+                        onChange={(e) => handleAssetChange(e.target.value)} 
                         value={assetQty}
                         disabled={isApprovePending || isApprovalConfirming || isTradePending || isTradeConfirming}
                     />
@@ -423,26 +461,28 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 </div>
             </div>
 
-            <div className="mt-8">
-                <h2 className="text-2xl mb-8">Statistics</h2>
+            {assetDetails && (
+                <div className="mt-8">
+                    <h2 className="text-2xl mb-8">Statistics</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-center md:text-left">
-                    <div className="flex flex-col gap-2">
-                        <h3>24h Change</h3>
-                        <p className={`text-sm ${assetDetails.priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            {assetDetails.priceChange >= 0 ? '+' : ''}{assetDetails.priceChange.toFixed(2)}%
-                        </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <h3>24h High</h3>
-                        <p className="text-[#5B6173] text-sm">${assetDetails.hightPrice.toFixed(2)}</p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <h3>24h Low</h3>
-                        <p className="text-[#5B6173] text-sm">${assetDetails.lowPrice.toFixed(2)}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-center md:text-left">
+                        <div className="flex flex-col gap-2">
+                            <h3>24h Change</h3>
+                            <p className={`text-sm ${assetDetails.priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {assetDetails.priceChange >= 0 ? '+' : ''}{assetDetails.priceChange.toFixed(2)}%
+                            </p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <h3>24h High</h3>
+                            <p className="text-[#5B6173] text-sm">${assetDetails.hightPrice.toFixed(2)}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <h3>24h Low</h3>
+                            <p className="text-[#5B6173] text-sm">${assetDetails.lowPrice.toFixed(2)}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

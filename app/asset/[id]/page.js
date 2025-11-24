@@ -17,8 +17,9 @@ import OneYearChart from "../../components/charts/1YearChart";
 import ThreeYearsChart from "../../components/charts/3YearsChart";
 import Footer from "../../components/Footer";
 import { fetchAssetDetails } from "../../../helpers/api";
-import { ethers } from 'ethers';
+import { useReadContract } from "wagmi";
 import assetPoolAbi from '../../../abi/assetPool.json';
+import Loader from "../../components/ui/Loader"
 
 function CustomTabPanel(props) {
     const { children, value, index } = props;
@@ -54,25 +55,24 @@ export default function page({ params }) {
         setValue(newValue);
     };
 
+    const { data: assetInfo } = useReadContract({
+        address: "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F",
+        abi: assetPoolAbi,
+        functionName: "getAssetInfo",
+        args: [id],
+    });
+
     useEffect(() => {
         async function getData() {
             try {
                 setLoading(true);
 
-                const provider = new ethers.JsonRpcProvider('https://arb-sepolia.g.alchemy.com/v2/ieYm8d748qFp12e9B0YO0haOD15fxPJo');
-                const contractAddress = '0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F';
-
-                const assetPoolContract = new ethers.Contract(contractAddress, assetPoolAbi, provider);
-
-                const assetInfo = await assetPoolContract.getAssetInfo(id);
-                console.log('All tickets:', assetInfo);
-
                 const tokenData = {
                     ticket: id,
-                    assetAddress: assetInfo.assetAddress,
-                    id: assetInfo.id.toString(),
-                    uri: assetInfo.uri,
-                    name: assetInfo.name
+                    assetAddress: assetInfo?.assetAddress,
+                    id: assetInfo?.id.toString(),
+                    uri: assetInfo?.uri,
+                    name: assetInfo?.name
                 };
 
                 setToken(tokenData);
@@ -96,13 +96,15 @@ export default function page({ params }) {
             }
         }
         getData();
-    }, [id, router]);
+    }, [id, router, assetInfo]);
 
 
     if (loading) return (
-        <div>
-            <span className="loading loading-ring loading-xs"></span>
-        </div>
+        assetInfo?.name === undefined ? (
+            <Loader text={`Loading`} />
+        ) : (
+            <Loader text={`Loading ${assetInfo?.name}`} />
+        )
     );
 
     return (
