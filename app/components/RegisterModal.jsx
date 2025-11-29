@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from "wagmi";
 import { arbitrumSepolia } from 'wagmi/chains';
 import { createAccount } from "../../helpers/api";
-import { parseUnits } from "ethers";
+import { parseUnits } from "viem";
 import usdtAbi from '../../abi/usdtAbi.json';
 import { useRouter } from 'next/navigation';
 
@@ -16,10 +16,9 @@ export default function RegisterModal() {
   const [email, setEmail] = useState('');
   const [familyName, setFamilyName] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
-  const router = useRouter();
 
   const { data: usdtAddress } = useReadContract({
-    address: "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F",
+    address: "0x549746c116153aFA22c4A1927E9DD4Cb30A26797",
     abi: assetPoolAbi,
     functionName: "usdt",
     chainId: arbitrumSepolia.chainId,
@@ -51,10 +50,10 @@ export default function RegisterModal() {
       // Step 2: Register user on blockchain
       writeContract({
         chainId: arbitrumSepolia.chainId,
-        address: '0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F',
+        address: '0x549746c116153aFA22c4A1927E9DD4Cb30A26797',
         functionName: 'registerUser',
         abi: assetPoolAbi,
-        args: ["983f386c-75a0-4d49-ad27-c1feef93b22b"]
+        args: [accountId]
       });
 
       // Wait for registration transaction to be confirmed

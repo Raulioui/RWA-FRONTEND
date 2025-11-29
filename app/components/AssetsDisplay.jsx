@@ -2,11 +2,11 @@
 import AssetComponent from "./ui/AssetComponent";
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { useDebouncedCallback } from 'use-debounce'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useReadContract, useReadContracts } from "wagmi";
 import assetPoolAbi from '../../abi/assetPool.json';
 
-const ASSET_POOL_ADDRESS = "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F";
+const ASSET_POOL_ADDRESS = "0x549746c116153aFA22c4A1927E9DD4Cb30A26797";
 
 export default function AssetsDisplay() {
     const searchParams = useSearchParams()

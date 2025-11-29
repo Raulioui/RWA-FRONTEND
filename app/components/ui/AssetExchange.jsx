@@ -7,7 +7,7 @@ import { parseUnits, formatUnits } from "viem";
 import usdtAbi from "../../../abi/usdtAbi.json";
 import assetAbi from "../../../abi/assetAbi.json";
 
-const ASSET_POOL_ADDRESS = "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F";
+const ASSET_POOL_ADDRESS = "0x549746c116153aFA22c4A1927E9DD4Cb30A26797";
 const USDT_ADDRESS = "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC";
 
 export default function AssetExchange({ ticket, price, token, loading, assetDetails }) {
@@ -64,25 +64,27 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
     // Hook para obtener allowance de Asset
     const { data: assetAllowance, refetch: refetchAssetAllowance } = useReadContract({
-        address: token?.address,
+        address: token?.assetAddress,
         abi: assetAbi,
         functionName: 'allowance',
         args: [account?.address, ASSET_POOL_ADDRESS],
         chainId: arbitrumSepolia.id,
         query: {
-            enabled: !!account?.address && !!token?.address
+            enabled: !!account?.address && !!token?.assetAddress
         }
     });
 
+    console.log(token)
+
     // Hook para obtener balance de asset
     const { data: assetBalanceRaw, refetch: refetchAssetBalance } = useReadContract({
-        address: token?.address,
+        address: token?.assetAddress,
         abi: assetAbi,
         functionName: "balanceOf",
         args: [account?.address],
         chainId: arbitrumSepolia.id,
         query: {
-            enabled: !!account?.address && !!token?.address
+            enabled: !!account?.address && !!token?.assetAddress
         }
     });
 
@@ -153,7 +155,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
     }, [isTradeSuccess, refetchUsdtBalance, refetchAssetBalance]);
 
     const handleApprove = useCallback(async () => {
-        if (!token?.address) {
+        if (!token?.assetAddress) {
             console.error("Token address not available");
             return;
         }
@@ -174,7 +176,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 const assetInWei = parseUnits(assetQty.toString(), 18);
                 await approveContract({
                     chainId: arbitrumSepolia.id,
-                    address: token.address,
+                    address: token.assetAddress,
                     abi: assetAbi,
                     functionName: 'approve',
                     args: [ASSET_POOL_ADDRESS, assetInWei],
@@ -460,29 +462,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                     )}
                 </div>
             </div>
-
-            {assetDetails && (
-                <div className="mt-8">
-                    <h2 className="text-2xl mb-8">Statistics</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-center md:text-left">
-                        <div className="flex flex-col gap-2">
-                            <h3>24h Change</h3>
-                            <p className={`text-sm ${assetDetails.priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {assetDetails.priceChange >= 0 ? '+' : ''}{assetDetails.priceChange.toFixed(2)}%
-                            </p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <h3>24h High</h3>
-                            <p className="text-[#5B6173] text-sm">${assetDetails.hightPrice.toFixed(2)}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <h3>24h Low</h3>
-                            <p className="text-[#5B6173] text-sm">${assetDetails.lowPrice.toFixed(2)}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

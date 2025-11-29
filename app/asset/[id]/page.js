@@ -20,6 +20,8 @@ import { fetchAssetDetails } from "../../../helpers/api";
 import { useReadContract } from "wagmi";
 import assetPoolAbi from '../../../abi/assetPool.json';
 import Loader from "../../components/ui/Loader"
+import UserRecord from '../../components/ui/UserRecord';
+import AssetsStadistics from "../../components/ui/AssetStadistics"
 
 function CustomTabPanel(props) {
     const { children, value, index } = props;
@@ -56,7 +58,7 @@ export default function page({ params }) {
     };
 
     const { data: assetInfo } = useReadContract({
-        address: "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F",
+        address: "0x549746c116153aFA22c4A1927E9DD4Cb30A26797",
         abi: assetPoolAbi,
         functionName: "getAssetInfo",
         args: [id],
@@ -170,6 +172,14 @@ export default function page({ params }) {
                     <AssetExchange ticket={id} price={assetPrice} token={token} loading={loading} assetDetails={assetDetails} />
                 </div>
 
+
+
+                <UserRecord assetAddress={assetInfo?.assetAddress} />
+
+            </div>
+
+            <div className="w-[90%] mx-auto mt-12 lg:w-[70%]">
+                <AssetsStadistics assetDetails={assetDetails} />
             </div>
 
             <Footer />

@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { arbitrumSepolia } from 'wagmi/chains';
 import assetPoolAbi from "../../abi/assetPool.json";
-import assetAbi from "../../abi/assetAbi.json"; // Standard ERC20 ABI
+import assetAbi from "../../abi/assetAbi.json";
 import usdtAbi from '../../abi/usdtAbi.json';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Loader from "../components/ui/Loader";
 import AssetComponentPortfolio from "../components/ui/AssetComponentPortfolio";
 
-const ASSET_POOL_ADDRESS = "0xF0716eD7D975d82CCA4eD4AEAa43746842A4225F";
+const ASSET_POOL_ADDRESS = "0x549746c116153aFA22c4A1927E9DD4Cb30A26797";
+const USDT_ADDRESS = "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC";
 
 export default function PortfolioPage() {
     const { address, isConnected } = useAccount();
@@ -49,14 +50,13 @@ export default function PortfolioPage() {
         enabled: !!address && !!assetsInfo,
     });
 
-    const usdtBalance = useReadContract({
-        address: "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC",
+    const { data: usdtBalance } = useReadContract({
+        address: USDT_ADDRESS,
         abi: usdtAbi,
         functionName: "balanceOf",
         args: [address],
         chainId: arbitrumSepolia.chainId,
     });
-    console.log(usdtBalance)
 
     useEffect(() => {
         if (tickets && assetsInfo && balances) {
@@ -67,11 +67,11 @@ export default function PortfolioPage() {
                 return {
                     ticket,
                     name: assetInfo?.name || "Unknown",
-                    address: assetInfo?.assetAddress,
+                    assetAddress: assetInfo?.assetAddress,
                     balance: balance.toString(),
                     uri: assetInfo?.uri,
                 };
-            }).filter(item => item.address); // Filter out invalid assets
+            }).filter(item => item.assetAddress);
 
             setPortfolioData(portfolio);
             setLoading(false);
@@ -95,7 +95,7 @@ export default function PortfolioPage() {
         );
     }
 
-    const totalAssets = portfolioData.filter(asset => BigInt(asset.balance) > 0n).length;
+    const usdtBalanceFormatted = usdtBalance ? (Number(usdtBalance) / 10 ** 6).toFixed(2) : "0.00";
 
     return (
         <>
@@ -110,20 +110,17 @@ export default function PortfolioPage() {
                             Wallet: {address?.slice(0, 6)}...{address?.slice(-4)}
                         </p>
                         <p className="text-gray-400 mt-1">
-                            Balance: {usdtBalance?.data}
+                            USDT Balance: {usdtBalanceFormatted} USDT
                         </p>
                     </div>
 
-
-
-
-                    {portfolioData.length === 0 ? (
+                    {portfolioData.length === 0 && BigInt(usdtBalance || 0) === 0n ? (
                         <div className="text-center py-12">
                             <p className="text-gray-400 text-lg">No assets found in the protocol</p>
                         </div>
                     ) : (
-                        <table className="w-full text-left rtl:text-right ">
-                            <thead >
+                        <table className="w-full text-left rtl:text-right">
+                            <thead>
                                 <tr className="text-[#5B6173]">
                                     <th scope="col" className="px-6 py-4">
                                         Asset
@@ -131,68 +128,64 @@ export default function PortfolioPage() {
                                     <th scope="col" className="px-6 py-4">
                                         Quantity
                                     </th>
-                                    <th scope="col" className="px-6 py-4">
+                                    <th scope="col" className="px-6 py-4 hidden md:table-cell">
                                         Address
                                     </th>
                                     <th scope="col" className="px-6 py-4 hidden md:table-cell">
                                         Last Price
                                     </th>
                                     <th scope="col" className="px-6 py-4 hidden md:table-cell">
-                                        Volume
+                                        Value
                                     </th>
-
                                 </tr>
                             </thead>
 
                             <tbody>
-                                <tr
-                                                className={`hover:bg-[#1E1C34] border-t-[1px] border-t-gray-600 transition duration-200  hover:cursor-pointer rounded-xl`}
-                                                onClick={() => router.push(`/asset/${ticket}`)}
-                                            >
-                                                <th scope="row" className="px-4 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                                    <div className="flex items-center gap-4">
-                                                         {/* <Image src={`https://ipfs.io/ipfs/${uri}`} width={25} height={25} alt={uri}/>  */}
-                                                        <div className="flex items-start flex-col gap-1 justify-center">
-                                                            <p className="">USDT</p> 
-                                                            <p className="text-[#5B6173] text-sm">USDT</p>
-                                                        </div>
-                                                    </div>
-                                                </th>
-                                                <td>
-                                                    200
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    -
-                                                </td>
-                                                <td className="px-6 py-4 absolute hidden md:table-cell">
-                                                        -
-                                                </td>
-                                                <td className="px-6 py-4 hidden md:table-cell">
-                                                    -
-                                                </td>
-                                            </tr>
-                                {portfolioData.map((asset, index) => {
-                                    return (
-                                        <AssetComponentPortfolio
-                                            key={index}
-                                            balance={asset.balance}
-                                            ticket={asset.ticket}
-                                            assetAddress={asset.assetAddress}
-                                            uri={asset.uri}
-                                            id={asset.id}
-                                            name={asset.name}
-                                        />
-                                    )
-                                })}
+                                {/* USDT Row */}
+                                {BigInt(usdtBalance || 0) > 0n && (
+                                    <tr className="hover:bg-[#1E1C34] border-t-[1px] border-t-gray-600 transition duration-200">
+                                        <th scope="row" className="px-4 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-start flex-col gap-1 justify-center">
+                                                    <p className="">USDT</p>
+                                                    <p className="text-[#5B6173] text-sm">Tether USD</p>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <td className="px-6 py-4">
+                                            {usdtBalanceFormatted}
+                                        </td>
+                                        <td className="px-6 py-4 hidden md:table-cell">
+                                            {`${USDT_ADDRESS.slice(0, 6)}...${USDT_ADDRESS.slice(-4)}`}
+                                        </td>
+                                        <td className="px-6 py-4 hidden md:table-cell">
+                                            1.00$
+                                        </td>
+                                        <td className="px-6 py-4 hidden md:table-cell">
+                                            {usdtBalanceFormatted}$
+                                        </td>
+                                    </tr>
+                                )}
+
+                                {/* Asset Rows */}
+                                {portfolioData?.map((asset, index) => (
+                                    <AssetComponentPortfolio
+                                        key={index}
+                                        balance={asset.balance}
+                                        ticket={asset.ticket}
+                                        assetAddress={asset.assetAddress}
+                                        uri={asset.uri}
+                                        id={asset.id}
+                                        name={asset.name}
+                                    />
+                                ))}
                             </tbody>
                         </table>
-
                     )}
                 </div>
             </div>
 
             <Footer />
         </>
-
     );
 }
