@@ -7,7 +7,7 @@ import { parseUnits, formatUnits } from "viem";
 import usdtAbi from "../../../abi/usdtAbi.json";
 import assetAbi from "../../../abi/assetAbi.json";
 
-const ASSET_POOL_ADDRESS = "0x549746c116153aFA22c4A1927E9DD4Cb30A26797";
+const ASSET_POOL_ADDRESS = "0x90f6e816308b25B6150677CA23076fdE1b914cA1";
 const USDT_ADDRESS = "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC";
 
 export default function AssetExchange({ ticket, price, token, loading, assetDetails }) {

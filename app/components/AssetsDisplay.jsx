@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react'
 import { useReadContract, useReadContracts } from "wagmi";
 import assetPoolAbi from '../../abi/assetPool.json';
 
-const ASSET_POOL_ADDRESS = "0x549746c116153aFA22c4A1927E9DD4Cb30A26797";
+const ASSET_POOL_ADDRESS = "0x90f6e816308b25B6150677CA23076fdE1b914cA1";
 
 export default function AssetsDisplay() {
     const searchParams = useSearchParams()

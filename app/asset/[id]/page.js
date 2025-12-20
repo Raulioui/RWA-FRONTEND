@@ -58,7 +58,7 @@ export default function page({ params }) {
     };
 
     const { data: assetInfo } = useReadContract({
-        address: "0x549746c116153aFA22c4A1927E9DD4Cb30A26797",
+        address: "0x90f6e816308b25B6150677CA23076fdE1b914cA1",
         abi: assetPoolAbi,
         functionName: "getAssetInfo",
         args: [id],

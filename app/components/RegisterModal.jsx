@@ -17,12 +17,14 @@ export default function RegisterModal() {
   const [familyName, setFamilyName] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
 
-  const { data: usdtAddress } = useReadContract({
-    address: "0x549746c116153aFA22c4A1927E9DD4Cb30A26797",
+  const { data: brokerDollar } = useReadContract({
+    address: "0x7A58A13594872953765928c1f0b79d3494412525",
     abi: assetPoolAbi,
-    functionName: "usdt",
+    functionName: "brokerDollar",
     chainId: arbitrumSepolia.chainId,
   });
+
+  console.log("USDT Address:", brokerDollar);
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -36,7 +38,7 @@ export default function RegisterModal() {
       return;
     }
 
-    if (!usdtAddress) {
+    if (!brokerDollar) {
       alert("USDT address not loaded yet");
       return;
     }
@@ -50,28 +52,11 @@ export default function RegisterModal() {
       // Step 2: Register user on blockchain
       writeContract({
         chainId: arbitrumSepolia.chainId,
-        address: '0x549746c116153aFA22c4A1927E9DD4Cb30A26797',
+        address: '0x7A58A13594872953765928c1f0b79d3494412525',
         functionName: 'registerUser',
         abi: assetPoolAbi,
-        args: [accountId]
+        args: ["884e6a75-1c18-4da6-9761-ddd51445de50"]
       });
-
-      // Wait for registration transaction to be confirmed
-      // Note: You'll need to implement a way to wait for the transaction
-      // For now, adding a delay (not ideal, but functional)
-      //await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Step 3: Mint USDT to user
-      writeContract({
-      chainId: arbitrumSepolia.chainId,
-      address: usdtAddress,
-      functionName: 'mint',
-      abi: usdtAbi,
-      args: [address, parseUnits("1000", 6)]
-    });
-
-      // Wait for mint transaction to be confirmed
-     // await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Redirect to market
     } catch (error) {
@@ -119,7 +104,7 @@ export default function RegisterModal() {
         />
         <button
           type="submit"
-          disabled={!usdtAddress || !isConnected || isRegistering}
+          disabled={!brokerDollar || !isConnected || isRegistering}
           className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
           {isRegistering ? "Processing..." : "Register & Claim USDT"}
         </button>

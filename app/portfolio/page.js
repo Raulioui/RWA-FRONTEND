@@ -11,7 +11,7 @@ import Footer from "../components/Footer";
 import Loader from "../components/ui/Loader";
 import AssetComponentPortfolio from "../components/ui/AssetComponentPortfolio";
 
-const ASSET_POOL_ADDRESS = "0x549746c116153aFA22c4A1927E9DD4Cb30A26797";
+const ASSET_POOL_ADDRESS = "0x90f6e816308b25B6150677CA23076fdE1b914cA1";
 const USDT_ADDRESS = "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC";
 
 export default function PortfolioPage() {

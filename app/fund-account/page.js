@@ -8,7 +8,7 @@ export default function FundAccount() {
     const { address } = useAccount();
 
     const { data: isUserRegistered } = useReadContract({
-        address: "0x549746c116153aFA22c4A1927E9DD4Cb30A26797",
+        address: "0x7A58A13594872953765928c1f0b79d3494412525",
         abi: assetPoolAbi,
         functionName: "isUserRegistered",
         args: [address],
