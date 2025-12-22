@@ -60,7 +60,7 @@ const AssetComponent = ({param, ticket, assetAddress, uri, id, name}) => {
             </tr>
         ) : (
             <tr
-                className={`hover:bg-[#1E1C34] ${isEqual ?  "" : "hidden"} border-t-[1px] border-t-gray-600 transition duration-200  hover:cursor-pointer rounded-xl`}
+                className={`hover:bg-[#1E1C34] ${isEqual ?  "" : "hidden"} border-t-[1px] border-t-gray-600 transition duration-200 rounded-xl hover:cursor-pointer`}
                 onClick={() => router.push(`/asset/${ticket}`)}
             >
                 <th scope="row" className="px-4 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">

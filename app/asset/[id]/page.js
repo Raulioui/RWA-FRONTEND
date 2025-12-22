@@ -22,6 +22,7 @@ import assetPoolAbi from '../../../abi/assetPool.json';
 import Loader from "../../components/ui/Loader"
 import UserRecord from '../../components/ui/UserRecord';
 import AssetsStadistics from "../../components/ui/AssetStadistics"
+import {CONTRACTS} from "../../../lib/contracts.js"
 
 function CustomTabPanel(props) {
     const { children, value, index } = props;
@@ -58,7 +59,7 @@ export default function page({ params }) {
     };
 
     const { data: assetInfo } = useReadContract({
-        address: "0x90f6e816308b25B6150677CA23076fdE1b914cA1",
+        address: CONTRACTS.assetPool,
         abi: assetPoolAbi,
         functionName: "getAssetInfo",
         args: [id],

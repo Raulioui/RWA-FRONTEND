@@ -1,17 +1,18 @@
 "use client";
 
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header from "../../../components/Header";
+import Footer from "../../../components/Footer";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import { CONTRACTS } from "../../../lib/contracts";
-import governorAbi from "../../../abi/governor.json";
+import { CONTRACTS } from "../../../../lib/contracts";
+import governorAbi from "../../.././../abi/governor.json";
 import {
     parseAbiItem,
     keccak256,
     toBytes,
     isAddress,
+    decodeFunctionData
 } from "viem";
 
 const votesTokenAbi = [
@@ -266,6 +267,8 @@ export default function ProposalDetailPage({ params }) {
     const isSucceeded = stateNum === 4;
     const isQueued = stateNum === 5;
 
+    console.log(proposal)
+
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
@@ -298,7 +301,7 @@ export default function ProposalDetailPage({ params }) {
                         </div>
                     ) : (
                         <>
-                            <div className="bg-[#1A1B1F] rounded-xl p-6">
+                            <div className="rounded-xl p-6">
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                                     <div className="flex-1">
                                         <div className="text-xs opacity-70">Proposer</div>
@@ -312,7 +315,7 @@ export default function ProposalDetailPage({ params }) {
                                         </div>
                                     </div>
 
-                                    <div className="min-w-[240px] bg-[#0E0B1C] border border-[#2A2B33] rounded-xl p-4">
+                                    <div className="min-w-[240px] bg-[#1E1C34] border border-[#2A2B33] rounded-xl p-4">
                                         <div className="text-xs opacity-70">State</div>
                                         <div className="text-lg font-bold text-[#CECCF6]">{stateLabel}</div>
 

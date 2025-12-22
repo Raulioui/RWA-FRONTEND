@@ -5,14 +5,12 @@ import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { arbitrumSepolia } from 'wagmi/chains';
 import assetPoolAbi from "../../abi/assetPool.json";
 import assetAbi from "../../abi/assetAbi.json";
-import usdtAbi from '../../abi/usdtAbi.json';
+import brokerDollarAbi from '../../abi/brokerDollar.json';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Loader from "../components/ui/Loader";
 import AssetComponentPortfolio from "../components/ui/AssetComponentPortfolio";
-
-const ASSET_POOL_ADDRESS = "0x90f6e816308b25B6150677CA23076fdE1b914cA1";
-const USDT_ADDRESS = "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC";
+import { CONTRACTS } from "../../lib/contracts.js";
 
 export default function PortfolioPage() {
     const { address, isConnected } = useAccount();
@@ -21,7 +19,7 @@ export default function PortfolioPage() {
 
     // Get all registered token tickets
     const { data: tickets } = useReadContract({
-        address: ASSET_POOL_ADDRESS,
+        address: CONTRACTS.assetPool,
         abi: assetPoolAbi,
         functionName: "getAllTokenTickets",
         chainId: arbitrumSepolia.chainId,
@@ -30,7 +28,7 @@ export default function PortfolioPage() {
     // Get asset info for each ticket
     const { data: assetsInfo } = useReadContracts({
         contracts: tickets?.map(ticket => ({
-            address: ASSET_POOL_ADDRESS,
+            address: CONTRACTS.assetPool,
             abi: assetPoolAbi,
             functionName: "getAssetInfo",
             args: [ticket],
@@ -51,8 +49,8 @@ export default function PortfolioPage() {
     });
 
     const { data: usdtBalance } = useReadContract({
-        address: USDT_ADDRESS,
-        abi: usdtAbi,
+        address: CONTRACTS.brokerDollar,
+        abi: brokerDollarAbi,
         functionName: "balanceOf",
         args: [address],
         chainId: arbitrumSepolia.chainId,
@@ -80,7 +78,7 @@ export default function PortfolioPage() {
 
     if (!isConnected) {
         return (
-            <div className="min-h-screen bg-[#0E0B1C] flex items-center justify-center">
+            <div className="min-h-screen  flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">Please Connect Your Wallet</h1>
                     <p className="text-gray-400">Connect your wallet to view your portfolio</p>
@@ -101,7 +99,7 @@ export default function PortfolioPage() {
         <>
             <Header />
 
-            <div className="min-h-screen bg-[#0E0B1C] p-6">
+            <div className="min-h-screen  p-6">
                 <div className="max-w-6xl mx-auto">
 
                     <div className="mb-8">
@@ -156,7 +154,7 @@ export default function PortfolioPage() {
                                             {usdtBalanceFormatted}
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
-                                            {`${USDT_ADDRESS.slice(0, 6)}...${USDT_ADDRESS.slice(-4)}`}
+                                            {`${CONTRACTS.brokerDollar.slice(0, 6)}...${CONTRACTS.brokerDollar.slice(-4)}`}
                                         </td>
                                         <td className="px-6 py-4 hidden md:table-cell">
                                             1.00$

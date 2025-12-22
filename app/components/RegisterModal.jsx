@@ -5,9 +5,7 @@ import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from "wagmi";
 import { arbitrumSepolia } from 'wagmi/chains';
 import { createAccount } from "../../helpers/api";
-import { parseUnits } from "viem";
-import usdtAbi from '../../abi/usdtAbi.json';
-import { useRouter } from 'next/navigation';
+import {CONTRACTS} from "../../lib/contracts"
 
 export default function RegisterModal() {
   const { data: hash, writeContract, isPending, isError, error } = useWriteContract();
@@ -18,7 +16,7 @@ export default function RegisterModal() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   const { data: brokerDollar } = useReadContract({
-    address: "0x7A58A13594872953765928c1f0b79d3494412525",
+    address: CONTRACTS.assetPool,
     abi: assetPoolAbi,
     functionName: "brokerDollar",
     chainId: arbitrumSepolia.chainId,
@@ -52,13 +50,11 @@ export default function RegisterModal() {
       // Step 2: Register user on blockchain
       writeContract({
         chainId: arbitrumSepolia.chainId,
-        address: '0x7A58A13594872953765928c1f0b79d3494412525',
+        address: CONTRACTS.assetPool,
         functionName: 'registerUser',
         abi: assetPoolAbi,
-        args: ["884e6a75-1c18-4da6-9761-ddd51445de50"]
+        args: accountId
       });
-
-      // Redirect to market
     } catch (error) {
       console.error("Registration error:", error);
       alert(`Registration failed: ${error.message || "Please try again."}`);

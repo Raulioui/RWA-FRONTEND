@@ -4,11 +4,9 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import assetPool from "../../../abi/assetPool.json";
 import { arbitrumSepolia } from 'wagmi/chains';
 import { parseUnits, formatUnits } from "viem";
-import usdtAbi from "../../../abi/usdtAbi.json";
+import brokerDollarAbi from "../../../abi/brokerDollar.json";
 import assetAbi from "../../../abi/assetAbi.json";
-
-const ASSET_POOL_ADDRESS = "0x90f6e816308b25B6150677CA23076fdE1b914cA1";
-const USDT_ADDRESS = "0x80Efc4Bcb5797a952943512b10c1595aCdE821cC";
+import { CONTRACTS } from "../../../lib/contracts";
 
 export default function AssetExchange({ ticket, price, token, loading, assetDetails }) {
     const [usdQty, setUsdQty] = useState(0);
@@ -18,7 +16,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
     const account = useAccount();
     
-    // Separate hooks for approval and trading
     const { 
         data: approvalHash, 
         writeContractAsync: approveContract, 
@@ -44,18 +41,18 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
     // Hook para obtener accountId
     const { data: accountId } = useReadContract({
         chainId: arbitrumSepolia.id,
-        address: ASSET_POOL_ADDRESS,
+        address: CONTRACTS.assetPool,
         functionName: 'userToAccountId',
         abi: assetPool,
         args: [account?.address],
     });
 
     // Hook para obtener allowance de USDT
-    const { data: usdtAllowance, refetch: refetchUsdtAllowance } = useReadContract({
-        address: USDT_ADDRESS,
-        abi: usdtAbi,
+    const { data: brokerDollarAllowance, refetch: refetchBrokerDollarAllowance } = useReadContract({
+        address: CONTRACTS.brokerDollar,
+        abi: brokerDollarAbi,
         functionName: 'allowance',
-        args: [account?.address, ASSET_POOL_ADDRESS],
+        args: [account?.address, CONTRACTS.assetPool],
         chainId: arbitrumSepolia.id,
         query: {
             enabled: !!account?.address
@@ -67,16 +64,13 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         address: token?.assetAddress,
         abi: assetAbi,
         functionName: 'allowance',
-        args: [account?.address, ASSET_POOL_ADDRESS],
+        args: [account?.address, CONTRACTS.assetPool],
         chainId: arbitrumSepolia.id,
         query: {
             enabled: !!account?.address && !!token?.assetAddress
         }
     });
 
-    console.log(token)
-
-    // Hook para obtener balance de asset
     const { data: assetBalanceRaw, refetch: refetchAssetBalance } = useReadContract({
         address: token?.assetAddress,
         abi: assetAbi,
@@ -88,10 +82,9 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         }
     });
 
-    // Hook para obtener balance de USDT
-    const { data: usdtBalanceRaw, refetch: refetchUsdtBalance } = useReadContract({
-        address: USDT_ADDRESS,
-        abi: usdtAbi,
+    const { data: brokerDollarBalanceRaw, refetch: refetchBrokerDollarBalance } = useReadContract({
+        address: CONTRACTS.brokerDollar,
+        abi: brokerDollarAbi,
         functionName: "balanceOf",
         args: [account?.address],
         chainId: arbitrumSepolia.id,
@@ -100,20 +93,19 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         }
     });
 
-    // Formatear balances
     const assetBalance = assetBalanceRaw ? formatUnits(assetBalanceRaw, 18) : "0";
-    const usdtBalance = usdtBalanceRaw ? formatUnits(usdtBalanceRaw, 6) : "0";
+    const dollarBalance = brokerDollarBalanceRaw ? formatUnits(brokerDollarBalanceRaw, 6) : "0";
 
     // Memoize approval check functions
     const needsUsdtApproval = useMemo(() => {
-        if (!usdtAllowance || !usdQty || usdQty <= 0) return true;
+        if (!brokerDollarAllowance || !usdQty || usdQty <= 0) return true;
         try {
             const requiredAmount = parseUnits(usdQty.toString(), 6);
-            return BigInt(usdtAllowance) < BigInt(requiredAmount);
+            return BigInt(brokerDollarAllowance) < BigInt(requiredAmount);
         } catch {
             return true;
         }
-    }, [usdtAllowance, usdQty]);
+    }, [brokerDollarAllowance, usdQty]);
 
     const needsAssetApproval = useMemo(() => {
         if (!assetAllowance || !assetQty || assetQty <= 0) return true;
@@ -133,26 +125,26 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         if (isApprovalSuccess) {
             const refetchAllowances = async () => {
                 await Promise.all([
-                    refetchUsdtAllowance(),
+                    refetchBrokerDollarAllowance(),
                     refetchAssetAllowance()
                 ]);
             };
             refetchAllowances();
         }
-    }, [isApprovalSuccess, refetchUsdtAllowance, refetchAssetAllowance]);
+    }, [isApprovalSuccess, refetchBrokerDollarAllowance, refetchAssetAllowance]);
 
     // Refetch balances after trade success
     useEffect(() => {
         if (isTradeSuccess) {
             const refetchBalances = async () => {
                 await Promise.all([
-                    refetchUsdtBalance(),
+                    refetchBrokerDollarBalance(),
                     refetchAssetBalance()
                 ]);
             };
             refetchBalances();
         }
-    }, [isTradeSuccess, refetchUsdtBalance, refetchAssetBalance]);
+    }, [isTradeSuccess, refetchBrokerDollarBalance, refetchAssetBalance]);
 
     const handleApprove = useCallback(async () => {
         if (!token?.assetAddress) {
@@ -166,10 +158,10 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 const usdInWei = parseUnits(usdQty.toString(), 6);
                 await approveContract({
                     chainId: arbitrumSepolia.id,
-                    address: USDT_ADDRESS,
-                    abi: usdtAbi,
+                    address: CONTRACTS.brokerDollar,
+                    abi: brokerDollarAbi,
                     functionName: 'approve',
-                    args: [ASSET_POOL_ADDRESS, usdInWei],
+                    args: [CONTRACTS.assetPool, usdInWei],
                 });
             } else {
                 // Approve Asset
@@ -179,7 +171,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                     address: token.assetAddress,
                     abi: assetAbi,
                     functionName: 'approve',
-                    args: [ASSET_POOL_ADDRESS, assetInWei],
+                    args: [CONTRACTS.assetPool, assetInWei],
                 });
             }
         } catch (error) {
@@ -197,7 +189,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
         await tradeContract({
             chainId: arbitrumSepolia.id,
-            address: ASSET_POOL_ADDRESS,
+            address: CONTRACTS.assetPool,
             functionName: 'mintAsset',
             abi: assetPool,
             args: [usdInWei, token.ticket, assetQtyInWei],
@@ -214,7 +206,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
         await tradeContract({
             chainId: arbitrumSepolia.id,
-            address: ASSET_POOL_ADDRESS,
+            address: CONTRACTS.assetPool,
             functionName: 'redeemAsset',
             abi: assetPool,
             args: [assetInWei, token.ticket, usdQtyInWei],
@@ -280,7 +272,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 </div>
             </div>
             <span className="text-xs text-[#5B6173] px-4 pb-2 block">
-                Balance: {parseFloat(usdtBalance).toFixed(2)}
+                Balance: {parseFloat(dollarBalance).toFixed(2)}
             </span>
         </div>
     );

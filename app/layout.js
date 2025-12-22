@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`antialiased bg-[#0E0B1C] text-[#C6C4EB] ${dm_sans.className}`}
+        className={` bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 ${dm_sans.className}`}
         >
       <Providers>
         {children}

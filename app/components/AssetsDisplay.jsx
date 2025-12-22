@@ -5,8 +5,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import { useState, useMemo } from 'react'
 import { useReadContract, useReadContracts } from "wagmi";
 import assetPoolAbi from '../../abi/assetPool.json';
-
-const ASSET_POOL_ADDRESS = "0x90f6e816308b25B6150677CA23076fdE1b914cA1";
+import { CONTRACTS } from "../../lib/contracts";
 
 export default function AssetsDisplay() {
     const searchParams = useSearchParams()
@@ -16,7 +15,7 @@ export default function AssetsDisplay() {
 
     // Fetch all token tickets
     const { data: tickets, isLoading: ticketsLoading, isError: ticketsError } = useReadContract({
-        address: ASSET_POOL_ADDRESS,
+        address: CONTRACTS.assetPool,
         abi: assetPoolAbi,
         functionName: "getAllTokenTickets",
     });
@@ -26,7 +25,7 @@ export default function AssetsDisplay() {
         if (!tickets || tickets.length === 0) return [];
         
         return tickets.map((ticket) => ({
-            address: ASSET_POOL_ADDRESS,
+            address: CONTRACTS.assetPool,
             abi: assetPoolAbi,
             functionName: "getAssetInfo",
             args: [ticket],

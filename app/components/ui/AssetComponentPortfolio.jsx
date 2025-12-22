@@ -1,17 +1,11 @@
 "use client"
 import {useEffect, useState} from "react"
-import Image from 'next/image'
-import up from "../../../public/up.svg"
-import down from "../../../public/down.svg"
 import Skeleton from '@mui/material/Skeleton';
 import {fetchAssetData} from "../../../helpers/api.js"
-import {formatVolume} from "../../../lib/formatters"
 import { useRouter } from "next/navigation"
 
 export default function AssetComponentPortfolio({balance, ticket, assetAddress, uri, id, name}) {
     const [loading, setLoading] = useState(true);
-
-    console.log(ticket)
 
     const router = useRouter();
 
@@ -34,10 +28,8 @@ export default function AssetComponentPortfolio({balance, ticket, assetAddress, 
          getData();
          setLoading(false);
     }, [ticket])
-
-    // Add return statement here!
     if (BigInt(balance) <= 0) {
-        return null; // Don't render anything if balance is 0
+        return null; 
     }
 
     return (

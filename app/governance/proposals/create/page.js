@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { encodeFunctionData } from "viem";
 import { useWriteContract } from "wagmi";
-import { CONTRACTS } from "../../../lib/contracts";
+import { CONTRACTS } from "../../lib/contracts";
 
 // ✅ IMPORTANT: this ABI must include createTokenRegistry(...)
 import assetPoolAbi from "../../../abi/assetPool.json";
@@ -118,7 +118,6 @@ export default function ProposePage() {
             </Link>
           </div>
 
-          {/* Config check */}
           {(assetPool === "0x0000000000000000000000000000000000000000" ||
             governor === "0x0000000000000000000000000000000000000000") && (
             <div className="bg-[#1A1B1F] p-4 rounded-lg text-sm mb-6">
