@@ -10,7 +10,7 @@ import {formatVolume} from "../../../lib/formatters"
 import { useRouter } from "next/navigation"
 
 const AssetComponent = ({param, ticket, assetAddress, uri, id, name}) => {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const router = useRouter();
 
@@ -20,6 +20,7 @@ const AssetComponent = ({param, ticket, assetAddress, uri, id, name}) => {
     const [volume, setVolume] = useState(0);
     
     useEffect(() => {
+        setLoading(true);
          const getData = async () => {
              const currentTime = new Date();
              const {totalVolume, res, assetPrice, priceChange} = await fetchAssetData(ticket, currentTime);
@@ -30,8 +31,8 @@ const AssetComponent = ({param, ticket, assetAddress, uri, id, name}) => {
              setVolume(formatVolume(totalVolume));
          }
 
-         getData();
-         setLoading(false);
+        getData();
+        setLoading(false);
     }, [ticket])
 
     const isEqualName = name.toLowerCase().includes(param?.toLowerCase())

@@ -19,10 +19,8 @@ export default function RegisterModal() {
     address: CONTRACTS.assetPool,
     abi: assetPoolAbi,
     functionName: "brokerDollar",
-    chainId: arbitrumSepolia.chainId,
+    chainId: arbitrumSepolia.id,
   });
-
-  console.log("USDT Address:", brokerDollar);
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -53,7 +51,7 @@ export default function RegisterModal() {
         address: CONTRACTS.assetPool,
         functionName: 'registerUser',
         abi: assetPoolAbi,
-        args: accountId
+        args: [accountId]
       });
     } catch (error) {
       console.error("Registration error:", error);

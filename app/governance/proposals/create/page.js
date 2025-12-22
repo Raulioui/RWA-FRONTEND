@@ -1,15 +1,13 @@
 "use client";
 
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import Header from "../../../components/Header";
+import Footer from "../../../components/Footer";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { encodeFunctionData } from "viem";
 import { useWriteContract } from "wagmi";
-import { CONTRACTS } from "../../lib/contracts";
-
-// ✅ IMPORTANT: this ABI must include createTokenRegistry(...)
-import assetPoolAbi from "../../../abi/assetPool.json";
+import { CONTRACTS } from "../../../../lib/contracts";
+import assetPoolAbi from "../../../../abi/assetPool.json";
 
 // Minimal OZ Governor ABI (only what we need)
 const governorAbi = [
