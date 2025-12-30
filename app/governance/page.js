@@ -1,5 +1,3 @@
-// app/governance/page.tsx
-
 import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -9,7 +7,6 @@ export default function GovernancePage() {
     <div>
       <Header />
 
-      {/* HERO */}
       <div className="mt-40 w-[95%] xl:w-[70%] mx-auto flex flex-col lg:flex-row gap-16 lg:gap-10 justify-between items-center lg:items-start">
         <div className="flex flex-col items-center lg:items-start max-w-2xl space-y-6">
           <p className="text-xs tracking-[0.25em] uppercase text-purple-400">
@@ -45,7 +42,6 @@ export default function GovernancePage() {
           </div>
         </div>
 
-        {/* Side info card */}
         <div className="w-full max-w-md space-y-4">
           <div className="bg-[#1E1C34] p-6 rounded-2xl shadow-md">
             <h3 className="text-xl font-semibold mb-2 text-white">
@@ -77,7 +73,6 @@ export default function GovernancePage() {
         </div>
       </div>
 
-      {/* HOW A PROPOSAL WORKS */}
       <div className="mt-24 max-w-6xl mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white text-center">
           How an on-chain proposal works

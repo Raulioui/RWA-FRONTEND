@@ -2,7 +2,7 @@ import Header from "./components/Header";
 import Link from "next/link";
 import Footer from "./components/Footer";
 import { activeTokens } from "../lib/activeTokens";
-import AssetComponentMain from "../app/components/ui/AssetComponentMain";
+import AssetComponentMain from "../app/components/AssetComponentMain";
 
 export default function Home() {
   return (
@@ -20,7 +20,7 @@ export default function Home() {
           </h1>
 
           <p className="text-gray-300 text-sm md:text-base text-center lg:text-left">
-            Trade synthetic stock tokens like <span className="font-semibold">dTSLA</span> using USDT.
+            Trade synthetic stock tokens like <span className="font-semibold">dTSLA</span> using The Broker Dollar.
             Every trade is backed by real execution through Alpaca and automated with{" "}
             <span className="font-semibold">Chainlink Functions</span>.
           </p>
@@ -39,21 +39,6 @@ export default function Home() {
             >
               Explore Governance
             </Link>
-          </div>
-
-          <div className="mt-4 grid grid-cols-3 gap-3 text-center lg:text-left w-full text-xs md:text-sm">
-            <div className="bg-[#1E1C34] rounded-xl px-3 py-3">
-              <p className="text-gray-400">Backed by</p>
-              <p className="text-white font-semibold">Alpaca</p>
-            </div>
-            <div className="bg-[#1E1C34] rounded-xl px-3 py-3">
-              <p className="text-gray-400">Automation</p>
-              <p className="text-white font-semibold">Chainlink Functions</p>
-            </div>
-            <div className="bg-[#1E1C34] rounded-xl px-3 py-3">
-              <p className="text-gray-400">Network</p>
-              <p className="text-white font-semibold">Testnet / EVM</p>
-            </div>
           </div>
         </div>
 
@@ -82,7 +67,7 @@ export default function Home() {
             Trade Real Stocks on the Blockchain
           </h2>
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-10">
-            Buy and sell tokenized versions of real-world stocks using USDT.
+            Buy and sell tokenized versions of real-world stocks using the Broker Dollar.
             The protocol submits orders to a real broker (Alpaca) and syncs positions on-chain.
           </p>
 
@@ -92,7 +77,7 @@ export default function Home() {
                 1. Deposit &amp; Mint
               </h3>
               <p className="text-gray-400 text-sm">
-                Deposit USDT and mint tokens like <span className="font-semibold">dTSLA</span>. 
+                Deposit Broker Dollar and mint tokens like <span className="font-semibold">dTSLA</span>. 
                 Each token represents exposure to the underlying real stock.
               </p>
             </div>
@@ -112,7 +97,7 @@ export default function Home() {
                 3. Redeem Anytime
               </h3>
               <p className="text-gray-400 text-sm">
-                Redeem your tokens back for USDT. The protocol unwinds the real-world position 
+                Redeem your tokens back for Broker Dollar. The protocol unwinds the real-world position 
                 and settles on-chain through the AssetPool.
               </p>
             </div>

@@ -8,25 +8,10 @@ import { encodeFunctionData } from "viem";
 import { useWriteContract } from "wagmi";
 import { CONTRACTS } from "../../../../lib/contracts";
 import assetPoolAbi from "../../../../abi/assetPool.json";
-
-// Minimal OZ Governor ABI (only what we need)
-const governorAbi = [
-  {
-    type: "function",
-    name: "propose",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "targets", type: "address[]" },
-      { name: "values", type: "uint256[]" },
-      { name: "calldatas", type: "bytes[]" },
-      { name: "description", type: "string" },
-    ],
-    outputs: [{ name: "proposalId", type: "uint256" }],
-  },
-];
+import governorAbi from "../../../../abi/governor.json";
 
 export default function ProposePage() {
-  // No env vars: use hardcoded config
+
   const assetPool = CONTRACTS.assetPool;
   const governor = CONTRACTS.governor;
 
@@ -63,8 +48,6 @@ export default function ProposePage() {
     }
 
     try {
-      // Calldata for AssetPool.createTokenRegistry(...)
-      // Assumes: createTokenRegistry(string name, string ticket, string imageCid)
       const calldata = encodeFunctionData({
         abi: assetPoolAbi,
         functionName: "createTokenRegistry",
@@ -75,7 +58,6 @@ export default function ProposePage() {
       const values = [0n];
       const calldatas = [calldata];
 
-      // Keep description readable + include structured fields
       const fullDescription =
         description.trim() +
         `\n\nToken:\n- name: ${name.trim()}\n- ticket: ${ticket.trim()}\n- imageCid: ${imageCid.trim() || "(none)"}`;
@@ -89,7 +71,6 @@ export default function ProposePage() {
 
       setTxHash(hash);
 
-      // Reset inputs
       setName("");
       setTicket("");
       setImageCid("");

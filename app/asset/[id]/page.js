@@ -12,7 +12,7 @@ import { use } from 'react';
 import MonthChart from "../../components/charts/MonthChart"
 import { useRouter } from "next/navigation";
 import { fetchCurrentPrice } from "../../../helpers/api";
-import AssetExchange from "../../components/ui/AssetExchange";
+import AssetExchange from "../../components/AssetExchange";
 import OneYearChart from "../../components/charts/1YearChart";
 import ThreeYearsChart from "../../components/charts/3YearsChart";
 import Footer from "../../components/Footer";
@@ -21,7 +21,7 @@ import { useReadContract } from "wagmi";
 import assetPoolAbi from '../../../abi/assetPool.json';
 import Loader from "../../components/ui/Loader"
 import UserRecord from '../../components/ui/UserRecord';
-import AssetsStadistics from "../../components/ui/AssetStadistics"
+import AssetsStadistics from "../../components/AssetStadistics"
 import {CONTRACTS} from "../../../lib/contracts.js"
 
 function CustomTabPanel(props) {

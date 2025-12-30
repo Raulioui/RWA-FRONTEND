@@ -1,12 +1,12 @@
 // components/ui/AssetStatistics.jsx
 "use client"
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, Activity, BarChart3, DollarSign, Volume2, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, Activity, BarChart3, DollarSign, Volume2 } from 'lucide-react';
+import StatCard from './ui/StatCard';
 
 export default function AssetStatistics({ assetDetails, ticket }) {
     const [activeTab, setActiveTab] = useState('overview');
 
-    // Safely access properties with defaults
     const data = {
         priceChange: assetDetails?.priceChange || 0,
         hightPrice: assetDetails?.hightPrice || 0,
@@ -46,24 +46,7 @@ export default function AssetStatistics({ assetDetails, ticket }) {
         return vol.toString();
     };
 
-    const StatCard = ({ icon: Icon, label, value, subtitle, trend }) => (
-        <div className="bg-[#1E1C34] rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-all">
-            <div className="flex items-start justify-between mb-2">
-                <div className="p-2 bg-[#2A2845] rounded-lg">
-                    <Icon className="w-5 h-5 text-blue-400" />
-                </div>
-                {trend !== undefined && trend !== null && (
-                    <div className={`flex items-center gap-1 text-sm ${trend >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {trend >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                        <span>{Math.abs(trend).toFixed(2)}%</span>
-                    </div>
-                )}
-            </div>
-            <div className="text-gray-400 text-sm mb-1">{label}</div>
-            <div className="text-white text-2xl font-semibold mb-1">{value}</div>
-            {subtitle && <div className="text-gray-500 text-xs">{subtitle}</div>}
-        </div>
-    );
+
 
     return (
         <div className="text-white">
@@ -88,10 +71,8 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                 </div>
             </div>
 
-            {/* Overview Tab */}
             {activeTab === 'overview' && (
                 <div className="space-y-6">
-                    {/* Quick Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <StatCard
                             icon={DollarSign}
@@ -117,7 +98,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                         />
                     </div>
 
-                    {/* Price Range Visualization */}
                     {data.priceRange > 0 && (
                         <div className="bg-[#1E1C34] rounded-lg p-6 border border-gray-700">
                             <h3 className="text-lg font-semibold mb-4">24h Price Range</h3>
@@ -144,7 +124,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                         </div>
                     )}
 
-                    {/* Price Metrics */}
                     {(data.openingPrice > 0 || data.avgPrice > 0 || data.vwap > 0) && (
                         <div className="bg-[#1E1C34] rounded-lg p-6 border border-gray-700">
                             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -180,7 +159,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                         </div>
                     )}
 
-                    {/* Market Depth */}
                     {(data.bidPrice > 0 || data.askPrice > 0) && (
                         <div className="bg-[#1E1C34] rounded-lg p-6 border border-gray-700">
                             <h3 className="text-xl font-semibold mb-4">Market Depth</h3>
@@ -210,7 +188,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                 </div>
             )}
 
-            {/* Technical Tab */}
             {activeTab === 'technical' && (
                 <div className="space-y-6">
                     {(data.rsi > 0 || data.sma5 > 0 || data.sma10 > 0) && (
@@ -240,7 +217,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                         </div>
                     )}
 
-                    {/* Momentum & Trend */}
                     {(data.momentum !== 0 || data.positiveBars > 0 || data.negativeBars > 0) && (
                         <div className="bg-[#1E1C34] rounded-lg p-6 border border-gray-700">
                             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -277,7 +253,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                                 )}
                             </div>
 
-                            {/* Trend Visualization */}
                             {(data.positiveBars > 0 || data.negativeBars > 0) && (
                                 <div className="mt-6">
                                     <div className="flex items-center gap-2 mb-2">
@@ -298,7 +273,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                         </div>
                     )}
 
-                    {/* RSI Gauge */}
                     {data.rsi > 0 && (
                         <div className="bg-[#1E1C34] rounded-lg p-6 border border-gray-700">
                             <h3 className="text-xl font-semibold mb-4">RSI Indicator</h3>
@@ -318,7 +292,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                 </div>
             )}
 
-            {/* Volume Tab */}
             {activeTab === 'volume' && (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -345,7 +318,6 @@ export default function AssetStatistics({ assetDetails, ticket }) {
                         )}
                     </div>
 
-                    {/* Volume Analysis */}
                     {data.avgVolume > 0 && (
                         <div className="bg-[#1E1C34] rounded-lg p-6 border border-gray-700">
                             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">

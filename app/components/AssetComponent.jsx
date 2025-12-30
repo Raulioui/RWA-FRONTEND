@@ -1,12 +1,12 @@
 "use client"
 import {useEffect, useState} from "react"
 import Image from 'next/image'
-import up from "../../../public/up.svg"
-import down from "../../../public/down.svg"
-import SimpleAssetChart from "../../components/charts/SimpleAssetChart";
+import up from "../../public/up.svg"
+import down from "../../public/down.svg"
+import SimpleAssetChart from "./charts/SimpleAssetChart";
 import Skeleton from '@mui/material/Skeleton';
-import {fetchAssetData} from "../../../helpers/api.js"
-import {formatVolume} from "../../../lib/formatters"
+import {fetchAssetData} from "../../helpers/api.js"
+import {formatVolume} from "../../lib/formatters"
 import { useRouter } from "next/navigation"
 
 const AssetComponent = ({param, ticket, assetAddress, uri, id, name}) => {

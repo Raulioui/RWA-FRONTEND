@@ -6,7 +6,7 @@ import { arbitrumSepolia } from 'wagmi/chains';
 import { parseUnits, formatUnits } from "viem";
 import brokerDollarAbi from "../../../abi/brokerDollar.json";
 import assetAbi from "../../../abi/assetAbi.json";
-import { CONTRACTS } from "../../../lib/contracts";
+import { CONTRACTS } from "../../lib/contracts";
 
 export default function AssetExchange({ ticket, price, token, loading, assetDetails }) {
     const [usdQty, setUsdQty] = useState(0);
@@ -38,7 +38,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
     const { isLoading: isTradeConfirming, isSuccess: isTradeSuccess } = 
         useWaitForTransactionReceipt({ hash: tradeHash });
 
-    // Hook para obtener accountId
     const { data: accountId } = useReadContract({
         chainId: arbitrumSepolia.id,
         address: CONTRACTS.assetPool,
@@ -47,7 +46,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         args: [account?.address],
     });
 
-    // Hook para obtener allowance de USDT
     const { data: brokerDollarAllowance, refetch: refetchBrokerDollarAllowance } = useReadContract({
         address: CONTRACTS.brokerDollar,
         abi: brokerDollarAbi,
@@ -59,7 +57,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         }
     });
 
-    // Hook para obtener allowance de Asset
     const { data: assetAllowance, refetch: refetchAssetAllowance } = useReadContract({
         address: token?.assetAddress,
         abi: assetAbi,
@@ -133,7 +130,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         }
     }, [isApprovalSuccess, refetchBrokerDollarAllowance, refetchAssetAllowance]);
 
-    // Refetch balances after trade success
     useEffect(() => {
         if (isTradeSuccess) {
             const refetchBalances = async () => {
@@ -154,7 +150,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
         try {
             if (mintMode) {
-                // Approve USDT
+                // Approve Broker dollar
                 const usdInWei = parseUnits(usdQty.toString(), 6);
                 await approveContract({
                     chainId: arbitrumSepolia.id,
@@ -231,7 +227,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         }
     }, [price]);
 
-    // Input change handlers
     const handleUsdtChange = useCallback((value) => {
         const numValue = parseFloat(value) || 0;
         setUsdQty(numValue);
@@ -254,7 +249,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         return <p>Token information not available</p>;
     }
 
-    // Input components
+
     const UsdtInput = () => (
         <div className="border-[#5B6173] border-[1px] rounded-lg">
             <div className="flex flex-col p-4 w-[200px] gap-2">
@@ -268,7 +263,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                         value={usdQty}
                         disabled={isApprovePending || isApprovalConfirming || isTradePending || isTradeConfirming}
                     />
-                    <p>USDT</p>
+                    <p>Broker Dollar</p>
                 </div>
             </div>
             <span className="text-xs text-[#5B6173] px-4 pb-2 block">
@@ -299,7 +294,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
         </div>
     );
 
-    // Get button status
     const isAnyPending = isApprovePending || isApprovalConfirming || isTradePending || isTradeConfirming;
     const canTrade = !needsApproval && !isAnyPending && account?.address && usdQty > 0 && assetQty > 0;
 
@@ -342,7 +336,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                     </div>
                 </div>
 
-                {/* Step Indicator */}
                 <div className="w-full max-w-md">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex flex-col items-center flex-1">
@@ -369,11 +362,10 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                     </div>
                 </div>
 
-                {/* Status Messages */}
                 {isApprovalConfirming && (
                     <div className="w-full max-w-md p-3 bg-yellow-900/20 border border-yellow-500/50 rounded-lg">
                         <p className="text-sm text-yellow-400 text-center">
-                            ⏳ Waiting for approval confirmation...
+                             Waiting for approval confirmation...
                         </p>
                     </div>
                 )}
@@ -381,7 +373,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 {isApprovalSuccess && needsApproval && (
                     <div className="w-full max-w-md p-3 bg-green-900/20 border border-green-500/50 rounded-lg">
                         <p className="text-sm text-green-400 text-center">
-                            ✓ Approval confirmed! Now click "{mintMode ? 'Buy' : 'Sell'}" to complete the trade.
+                             Approval confirmed! Now click "{mintMode ? 'Buy' : 'Sell'}" to complete the trade.
                         </p>
                     </div>
                 )}
@@ -389,7 +381,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 {isTradeConfirming && (
                     <div className="w-full max-w-md p-3 bg-blue-900/20 border border-blue-500/50 rounded-lg">
                         <p className="text-sm text-blue-400 text-center">
-                            ⏳ Processing your {mintMode ? 'buy' : 'sell'} order...
+                             Processing your {mintMode ? 'buy' : 'sell'} order...
                         </p>
                     </div>
                 )}
@@ -397,7 +389,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 {isTradeSuccess && (
                     <div className="w-full max-w-md p-3 bg-green-900/20 border border-green-500/50 rounded-lg">
                         <p className="text-sm text-green-400 text-center">
-                            🎉 Trade completed successfully!
+                             Trade completed successfully!
                         </p>
                         <p className="text-xs text-green-300 text-center mt-1 break-all">
                             {tradeHash}
@@ -408,14 +400,13 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
                 {(isApproveError || isTradeError) && (
                     <div className="w-full max-w-md p-3 bg-red-900/20 border border-red-500/50 rounded-lg">
                         <p className="text-sm text-red-400 text-center break-words">
-                            ❌ {(approveError?.shortMessage || tradeError?.shortMessage) || 
+                             {(approveError?.shortMessage || tradeError?.shortMessage) || 
                                 (approveError?.message || tradeError?.message) || 
                                 'Transaction failed'}
                         </p>
                     </div>
                 )}
 
-                {/* Action Buttons */}
                 <div className="flex pt-4 flex-col md:flex-row md:space-y-0 space-y-4 md:gap-4 items-center gap-6">
                     {needsApproval ? (
                         <button

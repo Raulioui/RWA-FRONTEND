@@ -9,7 +9,7 @@ import brokerDollarAbi from '../../abi/brokerDollar.json';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Loader from "../components/ui/Loader";
-import AssetComponentPortfolio from "../components/ui/AssetComponentPortfolio";
+import AssetComponentPortfolio from "../components/AssetComponentPortfolio";
 import { CONTRACTS } from "../../lib/contracts.js";
 
 export default function PortfolioPage() {
@@ -17,7 +17,6 @@ export default function PortfolioPage() {
     const [portfolioData, setPortfolioData] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Get all registered token tickets
     const { data: tickets } = useReadContract({
         address: CONTRACTS.assetPool,
         abi: assetPoolAbi,
@@ -25,7 +24,6 @@ export default function PortfolioPage() {
         chainId: arbitrumSepolia.chainId,
     });
 
-    // Get asset info for each ticket
     const { data: assetsInfo } = useReadContracts({
         contracts: tickets?.map(ticket => ({
             address: CONTRACTS.assetPool,
@@ -36,7 +34,6 @@ export default function PortfolioPage() {
         })) || [],
     });
 
-    // Get balances for each asset
     const { data: balances } = useReadContracts({
         contracts: assetsInfo?.map(asset => ({
             address: asset.result?.assetAddress,

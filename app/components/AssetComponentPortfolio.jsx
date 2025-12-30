@@ -1,7 +1,7 @@
 "use client"
 import {useEffect, useState} from "react"
 import Skeleton from '@mui/material/Skeleton';
-import {fetchAssetData} from "../../../helpers/api.js"
+import {fetchAssetData} from "../../helpers/api.js"
 import { useRouter } from "next/navigation"
 
 export default function AssetComponentPortfolio({balance, ticket, assetAddress, uri, id, name}) {

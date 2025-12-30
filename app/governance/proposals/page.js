@@ -75,7 +75,6 @@ export default function GovernorListPage() {
                     toBlock: "latest",
                 });
 
-                // newest first
                 const base = logs
                     .map((l) => ({
                         id: l.args.proposalId,
@@ -85,8 +84,7 @@ export default function GovernorListPage() {
                         endBlock: l.args.endBlock,
                     }))
                     .reverse();
-
-                // read state for each proposal
+                    
                 const withState = await Promise.all(
                     base.map(async (p) => {
                         try {

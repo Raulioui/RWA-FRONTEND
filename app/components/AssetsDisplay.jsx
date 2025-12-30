@@ -1,11 +1,12 @@
 "use client"
-import AssetComponent from "./ui/AssetComponent";
+import AssetComponent from "./AssetComponent";
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { useDebouncedCallback } from 'use-debounce'
 import { useState, useMemo } from 'react'
 import { useReadContract, useReadContracts } from "wagmi";
 import assetPoolAbi from '../../abi/assetPool.json';
 import { CONTRACTS } from "../../lib/contracts";
+import Loader from "./ui/Loader";
 
 export default function AssetsDisplay() {
     const searchParams = useSearchParams()
@@ -13,14 +14,12 @@ export default function AssetsDisplay() {
     const { replace } = useRouter()
     const [param, setParam] = useState("")
 
-    // Fetch all token tickets
     const { data: tickets, isLoading: ticketsLoading, isError: ticketsError } = useReadContract({
         address: CONTRACTS.assetPool,
         abi: assetPoolAbi,
         functionName: "getAllTokenTickets",
     });
 
-    // Create contract calls for each ticket to get asset info
     const assetInfoContracts = useMemo(() => {
         if (!tickets || tickets.length === 0) return [];
         
@@ -32,7 +31,6 @@ export default function AssetsDisplay() {
         }));
     }, [tickets]);
 
-    // Batch read all asset info
     const { data: assetInfoData, isLoading: assetsLoading, isError: assetsError } = useReadContracts({
         contracts: assetInfoContracts,
         query: {
@@ -40,14 +38,12 @@ export default function AssetsDisplay() {
         }
     });
 
-    // Process the asset data
     const assets = useMemo(() => {
         if (!tickets || !assetInfoData) return [];
 
         return tickets.map((ticket, index) => {
             const result = assetInfoData[index];
             
-            // Check if the read was successful
             if (result?.status !== 'success' || !result.result) {
                 return null;
             }
@@ -64,7 +60,6 @@ export default function AssetsDisplay() {
         }).filter(asset => asset !== null);
     }, [tickets, assetInfoData]);
 
-    // Filter assets based on search
     const filteredAssets = useMemo(() => {
         const searchTerm = searchParams.get("search")?.toLowerCase() || param.toLowerCase();
 
@@ -95,11 +90,7 @@ export default function AssetsDisplay() {
 
     if (isLoading) {
         return (
-            <div className="mt-20 w-[90%] m-auto">
-                <div className="flex justify-center items-center h-64">
-                    <div className="text-xl">Loading assets...</div>
-                </div>
-            </div>
+            <Loader text={"Loading assets...."}/>
         );
     }
 

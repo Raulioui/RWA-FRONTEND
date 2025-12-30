@@ -1,8 +1,8 @@
 "use client"
 import { useEffect, useState } from "react"
 import Image from 'next/image'
-import { fetchAssetData } from "../../../helpers/api.js"
-import { formatVolume } from "../../../lib/formatters"
+import { fetchAssetData } from "../../helpers/api.js"
+import { formatVolume } from "../../lib/formatters"
 import { useRouter } from "next/navigation"
 
 const AssetComponent = ({ name, ticket, image }) => {

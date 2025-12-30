@@ -12,7 +12,6 @@ import {
     keccak256,
     toBytes,
     isAddress,
-    decodeFunctionData
 } from "viem";
 
 const votesTokenAbi = [
@@ -83,7 +82,6 @@ export default function ProposalDetailPage({ params }) {
         setLoading(true);
 
         try {
-            // 1) Fetch ProposalCreated log for this proposalId
             const logs = await publicClient.getLogs({
                 address: governor,
                 event: proposalCreatedEvent,
@@ -113,7 +111,6 @@ export default function ProposalDetailPage({ params }) {
             };
             setProposal(p);
 
-            // 2) Read state/snapshot/deadline/votes
             const [st, snap, dead] = await Promise.all([
                 publicClient.readContract({
                     address: governor,
@@ -155,7 +152,6 @@ export default function ProposalDetailPage({ params }) {
                 setVotes(null);
             }
 
-            // 3) Get voting token address (GovernorVotes extension)
             try {
                 const t = await publicClient.readContract({
                     address: governor,
@@ -266,8 +262,6 @@ export default function ProposalDetailPage({ params }) {
     const isActive = stateNum === 1;
     const isSucceeded = stateNum === 4;
     const isQueued = stateNum === 5;
-
-    console.log(proposal)
 
     return (
         <div className="min-h-screen flex flex-col">

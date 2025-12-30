@@ -1,7 +1,6 @@
 import "server-only";
 
-const BASE_URL =
-  process.env.ALPACA_BROKER_BASE_URL || "https://broker-api.sandbox.alpaca.markets";
+const BASE_URL = "https://broker-api.sandbox.alpaca.markets";
 
 function json(status, obj) {
   return new Response(JSON.stringify(obj), {
@@ -12,8 +11,8 @@ function json(status, obj) {
 
 export async function POST(req) {
   try {
-    const key = process.env.ALPACA_KEY_ID;
-    const secret = process.env.ALPACA_SECRET_KEY;
+    const key = process.env.ALPACA_TRADING_KEY;
+    const secret = process.env.ALPACA_TRADING_SECRET;
 
     if (!key || !secret) {
       return json(500, { error: "Missing ALPACA_KEY_ID / ALPACA_SECRET_KEY" });
