@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🏦 RWA DEX (Testnet Demo)
+**Asynchronous on-chain settlement for tokenized real-world assets**  
+Solidity · Foundry · Chainlink Functions · Alpaca (Sandbox) · OZ Governor/Timelock · BeaconProxy
 
-## Getting Started
+> ⚠️ **Portfolio / testnet demo only — NOT production-ready.**  
+> This repository focuses on the **core protocol + async settlement design**.
 
-First, run the development server:
+---
 
+## TL;DR
+Smart contracts are synchronous (single-block execution). Real-world broker execution is asynchronous (seconds/minutes).  
+This project solves the mismatch with a **request-based state machine**:
+
+✅ `mint/redeem` create a request on-chain → off-chain execution via Chainlink Functions → callback settles  
+✅ Funds are **escrowed** and **refunded on failure** (refund-first handling)  
+✅ Tokens are **upgradeable via BeaconProxy**, controlled by **governance** (Governor + Timelock)
+
+
+## Key capabilities
+- Mint tokenized assets backed by broker execution (Alpaca sandbox)
+- Redeem tokens through automated broker sales
+- Trade on-chain with full ERC20 compatibility (per-asset ERC20)
+- Govern privileged actions: listings, upgrades, emergency controls (OZ Governor + Timelock)
+
+---
+
+## The problem (sync vs async)
+❌ Naive approach (doesn’t work):
+`user.mint()` → wait 30s broker API call → mint tokens  
+Transactions time out or fail. State becomes fragile.
+
+✅ This protocol:
+`user.mint()` → **create request (PENDING)** → async execution → callback → **settle** (FULFILLED / ERROR / EXPIRED)
+
+---
+
+## Architecture
+
+### Contracts
+- **AssetPool** — protocol coordinator + registry + user entrypoint  
+  - user actions: register, mint, redeem  
+  - governance-only actions: list assets / upgrades / emergency pause, etc.
+- **AssetToken** — ERC20 per asset (deployed via **BeaconProxy**)  
+  - manages request lifecycle for mint/redeem and settlement (mint/burn/refund)
+- **ChainlinkCaller** — Chainlink Functions integration layer  
+  - submits requests, receives fulfillments, forwards results to the right AssetToken
+- **BrokerDollar** — internal demo “USD-like” base token
+- **Governance** — OpenZeppelin Governor + Timelock  
+  - Timelock is the owner of privileged protocol actions
+
+### Request lifecycle (state machine)
+`PENDING → FULFILLED | ERROR | EXPIRED`
+
+- **PENDING**: request created, funds escrowed
+- **FULFILLED**: callback validated + slippage checked → mint/burn finalization
+- **ERROR**: failure path → refund
+- **EXPIRED**: timeout path → refund
+
+### Mint flow (sequence)
+1. User calls `AssetPool.mintAsset(...)`
+2. Protocol escrows funds + creates request in `AssetToken`
+3. `ChainlinkCaller` submits Chainlink Functions request (JS in `/functions`)
+4. DON executes JS → calls Alpaca sandbox → returns filled amount/result
+5. `ChainlinkCaller` receives fulfillment → `AssetToken` settles:
+   - validate requestId + caller + params
+   - enforce slippage bounds
+   - mint to user OR refund on failure
+
+---
+
+## Key technical decisions
+
+### 1) Request-based state machine
+Mint/redeem modeled as persistent requests with explicit lifecycle.
+Prevents state corruption from async failures and enables clean refunds/timeouts.
+
+### 2) Refund-first error handling
+All failure paths (API error, bad fill, timeout, unexpected callback) trigger refunds.
+Goal: user funds are **never trapped**.
+
+### 3) Slippage protection
+User submits `expectedAmount` (or bounds).
+Settlement validates actual vs expected; refunds on excessive deviation.
+
+### 4) Beacon Proxy pattern
+All AssetTokens are BeaconProxy instances pointing to a shared implementation via `UpgradeableBeacon`.
+Governance can upgrade all asset tokens atomically.
+
+---
+
+## Security notes (portfolio-level)
+This is a demo, but the design includes key safety constraints:
+- Callback validation: only authorized fulfillment path should settle
+- Request binding: fulfillment must match `requestId` + expected request state
+- Replay protection: a request can be settled once
+- Escrow accounting: balances must reconcile on every settlement outcome
+- Slippage checks before mint/burn finalization
+- Timeouts → deterministic refund path
+- Governance separation: Timelock owns privileged functions
+
+---
+
+
+### Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone https://github.com/Raulioui/rwa-exchange
+cd rwa-exchange
+npm install

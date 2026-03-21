@@ -34,6 +34,8 @@ export default function PortfolioPage() {
         })) || [],
     });
 
+    console.log(assetsInfo);
+
     const { data: balances } = useReadContracts({
         contracts: assetsInfo?.map(asset => ({
             address: asset.result?.assetAddress,
@@ -44,6 +46,7 @@ export default function PortfolioPage() {
         })).filter(contract => contract.address) || [],
         enabled: !!address && !!assetsInfo,
     });
+    console.log(balances);
 
     const { data: usdtBalance } = useReadContract({
         address: CONTRACTS.brokerDollar,

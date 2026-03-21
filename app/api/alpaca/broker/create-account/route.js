@@ -24,8 +24,7 @@ export async function POST(req) {
       return json(400, { error: "Missing name/email/familyName" });
     }
 
-    // ⚠️ DEMO payload (Alpaca Broker KYC fields are sensitive in real life)
-    const now = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const now = new Date().toISOString().slice(0, 10); 
 
     // 1) Create account
     const createRes = await fetch(`${BASE_URL}/v1/accounts`, {
@@ -85,18 +84,17 @@ export async function POST(req) {
       });
     }
 
+    console.log("Alpaca create account response:", createJson);
+
     const accountId = createJson?.id;
     if (!accountId) {
       return json(500, { error: "Alpaca response missing account id", details: createJson });
     }
 
-    // Optional: only continue if submitted
     if (createJson?.status !== "SUBMITTED") {
-      // In sandbox, you might get other states — return accountId anyway
       return json(200, { accountId, status: createJson?.status });
     }
 
-    // 2) Fetch account info (optional, used by your old flow)
     const infoRes = await fetch(`${BASE_URL}/v1/accounts/${accountId}`, {
       headers: {
         accept: "application/json",
@@ -108,8 +106,6 @@ export async function POST(req) {
 
     const info = infoRes.ok ? await infoRes.json() : null;
 
-    // 3) Create ACH relationship (optional demo)
-    // NOTE: this is demo-only. In real systems you don't do this automatically.
     let ach = null;
 
     if (info?.identity?.given_name && info?.account_number) {
@@ -124,7 +120,7 @@ export async function POST(req) {
         body: JSON.stringify({
           bank_account_type: "CHECKING",
           account_owner_name: info.identity.given_name,
-          bank_account_number: info.account_number, // ⚠️ your old code used this
+          bank_account_number: info.account_number, 
           bank_routing_number: "000000000",
         }),
         cache: "no-store",
@@ -133,7 +129,6 @@ export async function POST(req) {
       ach = achRes.ok ? await achRes.json() : null;
     }
 
-    // 4) Fund account (optional demo)
     let transfer = null;
 
     if (ach?.id && ach?.status === "QUEUED") {
@@ -158,7 +153,6 @@ export async function POST(req) {
       transfer = trRes.ok ? await trRes.json() : null;
     }
 
-    // Return what the frontend needs
     return json(200, {
       accountId,
       status: createJson?.status,

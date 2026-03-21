@@ -67,6 +67,8 @@ export default function page({ params }) {
 
     useEffect(() => {
         async function getData() {
+            if (!assetInfo?.assetAddress) return;
+            
             try {
                 setLoading(true);
 
@@ -175,8 +177,8 @@ export default function page({ params }) {
 
 
 
-                <UserRecord assetAddress={assetInfo?.assetAddress} />
-
+                {/**<UserRecord assetAddress={assetInfo?.assetAddress} />
+**/}
             </div>
 
             <div className="w-[90%] mx-auto mt-12 lg:w-[70%]">

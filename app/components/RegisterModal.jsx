@@ -51,7 +51,7 @@ export default function RegisterModal() {
         address: CONTRACTS.assetPool,
         functionName: 'registerUser',
         abi: assetPoolAbi,
-        args: [accountId]
+        args: [accountId.accountId]
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -109,10 +109,6 @@ export default function RegisterModal() {
           Please connect your wallet to register
         </p>
       )}
-
-      <p className="text-xs text-center text-gray-400 mt-4">
-        Already have an account? <a href="/login" className="underline text-purple-400">Log in</a>
-      </p>
     </div>
   );
 }

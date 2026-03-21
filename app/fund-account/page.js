@@ -21,7 +21,7 @@ export default function FundAccount() {
     functionName: "isUserRegistered",
     args: [address],
     query: {
-      enabled: !!address, // ✅ don't call if no wallet
+      enabled: !!address, 
     },
   });
 
@@ -39,7 +39,6 @@ export default function FundAccount() {
               To mint and redeem assets, you need to register an account ID in the protocol.
             </p>
 
-            {/* Wallet not connected */}
             {!isConnected && (
               <div className="mt-6 rounded-xl bg-[#0E0B1C] border border-[#2A2B33] p-4">
                 <div className="text-sm text-[#CECCF6] font-semibold">
@@ -51,7 +50,6 @@ export default function FundAccount() {
               </div>
             )}
 
-            {/* Loading */}
             {isConnected && isLoading && (
               <div className="mt-6 rounded-xl bg-[#0E0B1C] border border-[#2A2B33] p-4">
                 <div className="text-sm text-[#CECCF6] font-semibold">
@@ -63,7 +61,6 @@ export default function FundAccount() {
               </div>
             )}
 
-            {/* Error */}
             {isConnected && isError && (
               <div className="mt-6 rounded-xl bg-[#0E0B1C] border border-red-500/30 p-4">
                 <div className="text-sm text-red-300 font-semibold">
@@ -75,7 +72,6 @@ export default function FundAccount() {
               </div>
             )}
 
-            {/* Registered */}
             {isConnected && !isLoading && !isError && isUserRegistered === true && (
               <div className="mt-6 rounded-xl bg-[#0E0B1C] border border-green-500/20 p-4">
                 <div className="text-sm text-[#CECCF6] font-semibold">
@@ -102,16 +98,8 @@ export default function FundAccount() {
               </div>
             )}
 
-            {/* Not registered */}
             {isConnected && !isLoading && !isError && isUserRegistered === false && (
-              <div className="mt-6 rounded-xl bg-[#0E0B1C] border border-[#2A2B33] p-4">
-                <div className="text-sm text-[#CECCF6] font-semibold">
-                  Not registered yet
-                </div>
-                <p className="text-xs opacity-70 mt-1">
-                  Register to receive your account ID and enable mint/redeem actions.
-                </p>
-
+              <div className="mt-4 rounded-xl  p-2">
                 <div className="mt-4">
                   <RegisterModal />
                 </div>
@@ -122,10 +110,6 @@ export default function FundAccount() {
               </div>
             )}
           </div>
-
-          <p className="text-xs opacity-50 mt-4 text-center">
-            AssetPool: <span className="font-mono">{CONTRACTS.assetPool}</span>
-          </p>
         </div>
       </main>
     </div>

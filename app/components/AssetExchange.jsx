@@ -1,11 +1,11 @@
 "use client"
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import assetPool from "../../../abi/assetPool.json";
+import assetPool from "../../abi/assetPool.json";
 import { arbitrumSepolia } from 'wagmi/chains';
 import { parseUnits, formatUnits } from "viem";
-import brokerDollarAbi from "../../../abi/brokerDollar.json";
-import assetAbi from "../../../abi/assetAbi.json";
+import brokerDollarAbi from "../../abi/brokerDollar.json";
+import assetAbi from "../../abi/assetAbi.json";
 import { CONTRACTS } from "../../lib/contracts";
 
 export default function AssetExchange({ ticket, price, token, loading, assetDetails }) {
@@ -37,14 +37,6 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
     
     const { isLoading: isTradeConfirming, isSuccess: isTradeSuccess } = 
         useWaitForTransactionReceipt({ hash: tradeHash });
-
-    const { data: accountId } = useReadContract({
-        chainId: arbitrumSepolia.id,
-        address: CONTRACTS.assetPool,
-        functionName: 'userToAccountId',
-        abi: assetPool,
-        args: [account?.address],
-    });
 
     const { data: brokerDollarAllowance, refetch: refetchBrokerDollarAllowance } = useReadContract({
         address: CONTRACTS.brokerDollar,
@@ -182,6 +174,7 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
         const usdInWei = parseUnits(usdQty.toString(), 6);
         const assetQtyInWei = parseUnits(assetQty.toString(), 18);
+        console.log(token.ticket, usdInWei, assetQtyInWei);   
 
         await tradeContract({
             chainId: arbitrumSepolia.id,
@@ -199,6 +192,8 @@ export default function AssetExchange({ ticket, price, token, loading, assetDeta
 
         const assetInWei = parseUnits(assetQty.toString(), 18);
         const usdQtyInWei = parseUnits(usdQty.toString(), 6);
+
+        console.log(assetInWei, token.ticket, usdQtyInWei);
 
         await tradeContract({
             chainId: arbitrumSepolia.id,

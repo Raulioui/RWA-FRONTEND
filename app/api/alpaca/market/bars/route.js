@@ -8,8 +8,8 @@ export async function GET(req) {
     return new Response(JSON.stringify({ error: "Missing url param" }), { status: 400 });
   }
 
-  const key = process.env.ALPACA_KEY_ID;
-  const secret = process.env.ALPACA_SECRET_KEY;
+  const key = process.env.ALPACA_BROKER_KEY;
+  const secret = process.env.ALPACA_BROKER_SECRET;
 
   if (!key || !secret) {
     return new Response(JSON.stringify({ error: "Missing Alpaca env vars" }), { status: 500 });

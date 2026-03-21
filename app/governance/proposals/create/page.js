@@ -10,8 +10,21 @@ import { CONTRACTS } from "../../../../lib/contracts";
 import assetPoolAbi from "../../../../abi/assetPool.json";
 import governorAbi from "../../../../abi/governor.json";
 
-export default function ProposePage() {
+async function uploadImageToIpfs(file) {
+  const fd = new FormData();
+  fd.append("file", file);
 
+  const r = await fetch("/api/ipfs/upload", {
+    method: "POST",
+    body: fd,
+  });
+
+  if (!r.ok) throw new Error(await r.text());
+  const { cid } = await r.json();
+  return cid;
+}
+
+export default function ProposePage() {
   const assetPool = CONTRACTS.assetPool;
   const governor = CONTRACTS.governor;
 
@@ -23,6 +36,11 @@ export default function ProposePage() {
   const [txHash, setTxHash] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
+  // upload UI state
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadOk, setUploadOk] = useState(false);
+  const [uploadErr, setUploadErr] = useState(null);
+
   const { writeContractAsync, isPending } = useWriteContract();
 
   const canSubmit = useMemo(() => {
@@ -33,9 +51,31 @@ export default function ProposePage() {
       governor !== "0x0000000000000000000000000000000000000000" &&
       name.trim().length > 0 &&
       ticket.trim().length > 0 &&
-      description.trim().length > 0
+      description.trim().length > 0 &&
+      !isUploading // evita submit mientras sube imagen
     );
-  }, [assetPool, governor, name, ticket, description]);
+  }, [assetPool, governor, name, ticket, description, isUploading]);
+
+  async function onPickFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadErr(null);
+    setUploadOk(false);
+    setIsUploading(true);
+
+    try {
+      const cid = await uploadImageToIpfs(file);
+      console.log(cid)
+      setImageCid(cid);
+      setUploadOk(true);
+    } catch (err) {
+      setUploadErr((err?.message || "Upload failed").toString());
+      setImageCid("");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -51,7 +91,7 @@ export default function ProposePage() {
       const calldata = encodeFunctionData({
         abi: assetPoolAbi,
         functionName: "createTokenRegistry",
-        args: [name.trim(), ticket.trim(), imageCid.trim()],
+        args: [name.trim(), ticket.trim(), imageCid.trim()], // imageCid puede ser "" si es opcional
       });
 
       const targets = [assetPool];
@@ -71,16 +111,20 @@ export default function ProposePage() {
 
       setTxHash(hash);
 
+      // reset
       setName("");
       setTicket("");
       setImageCid("");
       setDescription("");
+      setUploadOk(false);
+      setUploadErr(null);
     } catch (err) {
-      const msg =
-        (err?.shortMessage || err?.message || "Transaction failed").toString();
+      const msg = (err?.shortMessage || err?.message || "Transaction failed").toString();
       setErrorMsg(msg);
     }
   }
+
+  const previewUrl = imageCid ? `https://ipfs.io/ipfs/${imageCid}` : null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -89,30 +133,13 @@ export default function ProposePage() {
       <main className="flex-1 px-10 pb-16">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#CECCF6]">
-              New proposal
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#CECCF6]">New proposal</h1>
             <Link className="opacity-80 hover:opacity-100" href="/governance">
               ← Back
             </Link>
           </div>
 
-          {(assetPool === "0x0000000000000000000000000000000000000000" ||
-            governor === "0x0000000000000000000000000000000000000000") && (
-            <div className="bg-[#1A1B1F] p-4 rounded-lg text-sm mb-6">
-              Contract addresses not configured. Edit{" "}
-              <code className="opacity-90">app/lib/contracts.js</code> and set:
-              <div className="mt-2">
-                - <code>CONTRACTS.assetPool</code>
-                <br />- <code>CONTRACTS.governor</code>
-              </div>
-            </div>
-          )}
-
-          <form
-            onSubmit={onSubmit}
-            className="bg-[#1A1B1F] rounded-xl p-6 space-y-4"
-          >
+          <form onSubmit={onSubmit} className="bg-[#1A1B1F] rounded-xl p-6 space-y-4">
             <div>
               <label className="text-sm opacity-80">Asset name</label>
               <input
@@ -131,19 +158,55 @@ export default function ProposePage() {
                 onChange={(e) => setTicket(e.target.value)}
                 placeholder="TSLA"
               />
-              <div className="text-xs opacity-60 mt-2">
-                Use the exact Alpaca symbol your backend supports.
-              </div>
             </div>
 
+            {/* Upload image */}
             <div>
-              <label className="text-sm opacity-80">Image CID (optional)</label>
-              <input
-                className="mt-2 w-full rounded-lg bg-[#0E0B1C] border border-[#2A2B33] px-4 py-3 outline-none"
-                value={imageCid}
-                onChange={(e) => setImageCid(e.target.value)}
-                placeholder="bafy... (IPFS CID)"
-              />
+              <label className="text-sm opacity-80">Project image (optional)</label>
+
+              <div className="mt-2 flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={onPickFile}
+                  className="block w-full text-sm"
+                />
+
+                {isUploading && (
+                  <span className="text-xs opacity-70">Uploading…</span>
+                )}
+
+                {uploadOk && !isUploading && (
+                  <span className="text-xs text-green-300">Uploaded ✓</span>
+                )}
+              </div>
+
+              {uploadErr && (
+                <div className="mt-2 text-xs text-red-300 break-words">
+                  Upload error: {uploadErr}
+                </div>
+              )}
+
+              {/* CID + preview */}
+              <div className="mt-3">
+                <label className="text-xs opacity-70">Image CID</label>
+                <input
+                  className="mt-2 w-full rounded-lg bg-[#0E0B1C] border border-[#2A2B33] px-4 py-3 outline-none font-mono text-xs"
+                  value={imageCid}
+                  onChange={(e) => setImageCid(e.target.value)}
+                  placeholder="bafy... (CID)"
+                />
+                {previewUrl && (
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs opacity-80 underline mt-2 inline-block"
+                  >
+                    Preview on IPFS gateway
+                  </a>
+                )}
+              </div>
             </div>
 
             <div>
@@ -152,7 +215,7 @@ export default function ProposePage() {
                 className="mt-2 w-full rounded-lg bg-[#0E0B1C] border border-[#2A2B33] px-4 py-3 outline-none min-h-[120px]"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Why should this asset be listed? Notes about risks/limits?"
+                placeholder="Why should this asset be listed?"
               />
             </div>
 
@@ -168,10 +231,6 @@ export default function ProposePage() {
             <div className="bg-[#1A1B1F] p-4 rounded-lg text-sm mt-6">
               Submitted! Tx hash:
               <div className="mt-2 break-all font-mono opacity-90">{txHash}</div>
-              <div className="text-xs opacity-60 mt-2">
-                You can now go to the Governance page to see the proposal (after the
-                event is indexed).
-              </div>
             </div>
           )}
 
@@ -181,11 +240,6 @@ export default function ProposePage() {
               <div className="mt-2 opacity-90 break-words">{errorMsg}</div>
             </div>
           )}
-
-          <div className="text-xs opacity-60 mt-4">
-            This creates a Governor proposal that calls{" "}
-            <code className="opacity-90">AssetPool.createTokenRegistry</code>.
-          </div>
         </div>
       </main>
 

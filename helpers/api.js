@@ -4,7 +4,9 @@ async function alpacaMarketGet(url) {
   return r.json();
 }
 
-export const fetchAssetDetails = async (ticket, currentTime) => {
+
+export const fetchAssetDetails = async (ticket) => {
+  const currentTime = new Date()
     const formatCurrentTime = currentTime.toISOString().split('T')[0];
     
     try {
@@ -220,7 +222,7 @@ export const createAccount = async (name, email, familyName) => {
   });
 
   if (!r.ok) throw new Error(await r.text());
-  return r.json(); // { accountId: "..." } or whatever you return
+  return r.json(); 
 };
 
 export const fetchAssetDataChart = async (ticket, currentTime, startDate, timeframe, limit) => {
