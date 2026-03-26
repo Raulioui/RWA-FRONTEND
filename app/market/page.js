@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import AssetsDisplay from "../components/AssetsDisplay"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
@@ -7,9 +8,9 @@ export default function Page() {
     <>
       <Header />
 
-      <div className="max-w-[1100px] text-center  m-auto my-20">
+      <div className="max-w-[1100px] text-center m-auto my-20">
         <div>
-          <h1 className="text-2xl md:text-5xl  mb-4">
+          <h1 className="text-2xl md:text-5xl mb-4">
             Stock Market
           </h1>
           <p className="text-md md:text-xl mb-2">
@@ -17,11 +18,12 @@ export default function Page() {
           </p>
         </div>
 
-        <AssetsDisplay />
+        <Suspense fallback={<div>Loading...</div>}>
+          <AssetsDisplay />
+        </Suspense>
       </div>
 
       <Footer />
     </>
-
   );
 }
