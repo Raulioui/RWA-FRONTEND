@@ -182,7 +182,7 @@ export default function page({ params }) {
             </div>
 
             <div className="w-[90%] mx-auto mt-12 lg:w-[70%]">
-                <AssetsStadistics assetDetails={assetDetails} />
+                <AssetsStadistics assetDetails={assetDetails} ticket={id} />
             </div>
 
             <Footer />

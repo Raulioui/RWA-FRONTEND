@@ -5,8 +5,7 @@ async function alpacaMarketGet(url) {
 }
 
 
-export const fetchAssetDetails = async (ticket) => {
-  const currentTime = new Date()
+export const fetchAssetDetails = async (ticket, currentTime = new Date())  => {
     const formatCurrentTime = currentTime.toISOString().split('T')[0];
     
     try {
