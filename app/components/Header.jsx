@@ -11,10 +11,10 @@ import menu from "../../public/menu.svg";
 import close from "../../public/close.svg";
 
 const NAV_LINKS = [
+  {href: "fund-account", label: "Get Broker Dollar"},
   { href: "/market", label: "Market" },
   { href: "/portfolio", label: "Portfolio" },
-  { href: "/governance", label: "Governance" },
-  { href: "/governance/proposals", label: "Proposals" },
+  { href: "/governance", label: "Governance" }
 ];
 
 export default function Header() {

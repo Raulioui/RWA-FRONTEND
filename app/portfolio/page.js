@@ -34,8 +34,6 @@ export default function PortfolioPage() {
         })) || [],
     });
 
-    console.log(assetsInfo);
-
     const { data: balances } = useReadContracts({
         contracts: assetsInfo?.map(asset => ({
             address: asset.result?.assetAddress,
@@ -46,7 +44,6 @@ export default function PortfolioPage() {
         })).filter(contract => contract.address) || [],
         enabled: !!address && !!assetsInfo,
     });
-    console.log(balances);
 
     const { data: usdtBalance } = useReadContract({
         address: CONTRACTS.brokerDollar,
@@ -103,12 +100,9 @@ export default function PortfolioPage() {
                 <div className="max-w-6xl mx-auto">
 
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold mb-2">My Portfolio 💼</h1>
+                        <h1 className="text-4xl font-bold mb-2">Portfolio</h1>
                         <p className="text-gray-400">
                             Wallet: {address?.slice(0, 6)}...{address?.slice(-4)}
-                        </p>
-                        <p className="text-gray-400 mt-1">
-                            USDT Balance: {usdtBalanceFormatted} USDT
                         </p>
                     </div>
 
